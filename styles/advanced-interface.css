@@ -1,0 +1,5484 @@
+/* Third-party popouts and embedded panel contents retain their own styles. */
+@scope (:root) to (.advanced-interface-native-panel.sidebar-popout, .advanced-interface-native-panel > :not(.window-header), .chat-message > .message-content > *) {
+/* Cascade: shared primitives, layout, component bases, then cross-component states and overlays.
+   Keep comma-separated selectors when sharing declarations: :is() can change their specificity. */
+/* Theme tokens: the interface theme (#interface, sidebar tabs, and their popouts) and the applications theme
+   (body) each carry .theme-dark or .theme-light, so module surfaces follow whichever theme owns them.
+   They are anchored on body because :root never matches inside this stylesheet's @scope. */
+body,
+.themed.theme-dark,
+.themed.theme-light {
+  --advanced-interface-hover-color: #4f4fff;
+  --advanced-interface-selected-color: #ff3f00;
+  --advanced-interface-on-highlight-color: var(--color-text-primary);
+  --advanced-interface-text-color: var(--color-text-primary);
+}
+
+body {
+  --advanced-interface-light-tab-color: var(--color-light-1);
+}
+
+body,
+body.theme-dark,
+.themed.theme-dark {
+  --advanced-interface-tab-color: var(--advanced-interface-toolbar-color);
+  --advanced-interface-toolbar-color: var(--color-cool-5);
+  --advanced-interface-card-color: var(--color-cool-5);
+  --advanced-interface-card-header-tint: 0 0 0;
+  --advanced-interface-card-border-color: var(--color-dark-1);
+  --advanced-interface-divider-color: var(--color-border);
+  --advanced-interface-resource-background: var(--color-cool-4);
+  --advanced-interface-input-highlight: color-mix(in srgb, var(--advanced-interface-hover-color) 18%, transparent);
+  /* Stock foundry2.css scopes these tokens to ProseMirror and #players.
+     Custom dropdowns and floating player cards need equivalent theme bridges. */
+  --advanced-interface-dropdown-background: var(--color-cool-4);
+  --advanced-interface-dropdown-border: var(--color-cool-3);
+  --advanced-interface-dropdown-hover: rgba(0, 0, 0, 0.25);
+  --advanced-interface-player-idle-color: #baaddc;
+  --advanced-interface-player-self-color: #c0eddb;
+}
+
+body.theme-light,
+.themed.theme-light {
+  --advanced-interface-tab-color: var(--advanced-interface-light-tab-color);
+  --advanced-interface-toolbar-color: #efe6d8;
+  --advanced-interface-card-color: #fff;
+  --advanced-interface-card-header-tint: 255 255 255;
+  --advanced-interface-resource-background: rgba(0, 0, 0, 0.1);
+  --advanced-interface-input-highlight: color-mix(in srgb, var(--advanced-interface-hover-color) 12%, transparent);
+  --advanced-interface-dropdown-background: #d9d8c8;
+  --advanced-interface-dropdown-border: #999;
+  --advanced-interface-dropdown-hover: rgba(0, 0, 0, 0.08);
+  --advanced-interface-player-idle-color: var(--color-text-subtle);
+  --advanced-interface-player-self-color: var(--color-text-emphatic);
+}
+
+/* Keep light foregrounds uniform without changing light-theme primary text. */
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window,
+  #scene-controls, #calendar-hud, #hotbar, #players, #chat-notifications) {
+  --color-light-1: #efe6d8;
+  --color-light-2: #efe6d8;
+  --color-light-3: #efe6d8;
+}
+
+@scope (body.theme-dark, .themed.theme-dark) to (.themed.theme-light) {
+  :is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window,
+    #scene-controls, #calendar-hud, #hotbar, #players, #chat-notifications) {
+    --color-text-primary: #efe6d8;
+    --color-text-secondary: #efe6d8;
+    --color-text-emphatic: #efe6d8;
+  }
+}
+
+/* Mirrors dnd5e.css --dnd5e-chat-background outside its .dnd5e2 scope.
+   URLs must be relative to this stylesheet, not the system stylesheet. */
+body.system-dnd5e,
+body.system-dnd5e .themed.theme-dark {
+  --advanced-interface-chat-card-background: var(--dnd5e-color-dark-gray) url("../../../ui/denim075.png");
+}
+
+body.system-dnd5e.theme-light,
+body.system-dnd5e .themed.theme-light {
+  --advanced-interface-chat-card-background: var(--dnd5e-color-parchment) url("../../../systems/dnd5e/ui/texture-gray1.webp") no-repeat top left;
+}
+
+:root {
+  --advanced-interface-thumbnail-fade: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+}
+
+#ui-right {
+  flex-wrap: nowrap;
+}
+
+body .advanced-interface-cutout-button {
+  position: relative;
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color, #4f4fff);
+  --advanced-interface-button-icon-color: var(--advanced-interface-text-color) !important;
+}
+
+body :is(.advanced-interface-cutout-button, .advanced-interface-hud-image-button, i:has(> .advanced-interface-icon-disc)) {
+  isolation: isolate;
+}
+
+body .advanced-interface-icon-disc {
+  z-index: -1 !important;
+}
+
+/* Shared 24px circles behind each 32px icon cell, including scaled canvas HUDs. */
+body :is(.advanced-interface-icon-disc, .advanced-interface-hud-image-disc) {
+  position: absolute;
+  top: calc(var(--advanced-interface-disc-top, 0px) + 4px);
+  left: calc(var(--advanced-interface-disc-left, 0px) + 4px);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) :is(
+  i, .icon, .window-icon, .advanced-interface-icon-disc,
+  .advanced-interface-cutout-icon, .advanced-interface-document-icon,
+  .advanced-interface-placeable-icon, .advanced-interface-journal-icon,
+  .advanced-interface-scene-title-icon, .advanced-interface-settings-section-icon,
+  .advanced-interface-calendar-icon, .advanced-interface-effect-disc
+),
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) :is(
+  i, .icon, .window-icon, .advanced-interface-icon-disc,
+  .advanced-interface-cutout-icon, .advanced-interface-document-icon,
+  .advanced-interface-placeable-icon, .advanced-interface-journal-icon,
+  .advanced-interface-scene-title-icon, .advanced-interface-settings-section-icon,
+  .advanced-interface-calendar-icon, .advanced-interface-effect-disc
+)::before,
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) :is(
+  i, .icon, .window-icon, .advanced-interface-icon-disc,
+  .advanced-interface-cutout-icon, .advanced-interface-document-icon,
+  .advanced-interface-placeable-icon, .advanced-interface-journal-icon,
+  .advanced-interface-scene-title-icon, .advanced-interface-settings-section-icon,
+  .advanced-interface-calendar-icon, .advanced-interface-effect-disc
+)::after {
+  text-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body .advanced-interface-cutout-button > .advanced-interface-icon-disc {
+  background: var(--advanced-interface-disc-color) !important;
+}
+
+body .advanced-interface-cutout-button:not(:disabled, [aria-disabled="true"]):is(:hover, :focus-visible, :active, .active, [aria-pressed="true"], [aria-expanded="true"]) > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+body .advanced-interface-cutout-button:is(:active, .active, [aria-pressed="true"], [aria-expanded="true"]):not(:hover, :focus-visible) {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color, #ff3f00);
+}
+
+body .advanced-interface-cutout-button:not(:disabled, [aria-disabled="true"]):is(:hover, :focus-visible, :active, .active, [aria-pressed="true"], [aria-expanded="true"])::before,
+body .advanced-interface-cutout-button:not(.advanced-interface-badged-button, :disabled, [aria-disabled="true"]):is(:hover, :focus-visible, :active, .active, [aria-pressed="true"], [aria-expanded="true"])::after,
+body .advanced-interface-cutout-button:not(:disabled, [aria-disabled="true"]):is(:hover, :focus-visible, :active, .active, [aria-pressed="true"], [aria-expanded="true"]) > .advanced-interface-cutout-icon {
+  opacity: 1 !important;
+}
+
+body .advanced-interface-badged-button::after {
+  z-index: 2;
+  color: var(--advanced-interface-button-icon-color, var(--advanced-interface-text-color)) !important;
+}
+
+body .advanced-interface-badged-button::before {
+  color: var(--advanced-interface-button-icon-color, var(--advanced-interface-text-color)) !important;
+}
+
+/* Leading-icon circles share geometry; component rules below control their highlight states. */
+.advanced-interface-popout-leader > .advanced-interface-icon-disc,
+.advanced-interface-settings-section-icon > .advanced-interface-icon-disc,
+.advanced-interface-calendar-icon > .advanced-interface-icon-disc {
+  background: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style .directory-item.entry.document > .advanced-interface-document-icon > .advanced-interface-icon-disc,
+.advanced-interface-journal-icon > .advanced-interface-icon-disc,
+.advanced-interface-chat-style.compendium-sidebar .compendium-name > i.advanced-interface-compendium-icon > .advanced-interface-icon-disc,
+.advanced-interface-chat-style .folder-header > i.advanced-interface-folder-icon > .advanced-interface-icon-disc,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header > i.advanced-interface-sound-icon > .advanced-interface-icon-disc,
+.advanced-interface-chat-style.placeables-sidebar .advanced-interface-placeable-row-icon > .advanced-interface-icon-disc {
+  background: var(--advanced-interface-disc-color, var(--advanced-interface-hover-color));
+}
+
+/* A tab under a drag it accepts looks hovered. */
+#sidebar.advanced-interface > #sidebar-tabs > menu > li.advanced-interface-drop-target > .advanced-interface-cutout-button > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content.expanded) > #sidebar-tabs [data-tab][aria-pressed="true"] {
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color);
+  color: var(--control-icon-color) !important;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content.expanded) > #sidebar-tabs [data-tab][aria-pressed="true"]:not(:hover, :focus-visible, :active) > .advanced-interface-icon-disc {
+  opacity: 0;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content.expanded) > #sidebar-tabs [data-tab][aria-pressed="true"]:not(:hover, :focus-visible, :active)::before {
+  opacity: 1 !important;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content.expanded) > #sidebar-tabs > menu > li:is(.advanced-interface-panel-unmuted, .advanced-interface-drop-target) > [data-tab][aria-pressed="true"] > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content) > #sidebar-tabs > menu > li > [data-tab="advancedVolume"].fa-volume-xmark > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content) > #sidebar-tabs > menu > li:not(.advanced-interface-panel-unmuted, .advanced-interface-drop-target) > [data-tab="advancedVolume"].fa-volume-xmark:not(:hover, :focus-visible, :active) {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+/* The A/V camera dock can take a side of the screen, so size the tab rows from #interface rather than the viewport. */
+#interface:has(> #ui-right > #sidebar.advanced-interface) {
+  container-type: inline-size;
+}
+
+#ui-right:has(> #sidebar.advanced-interface) {
+  z-index: var(--advanced-interface-sidebar-layer, var(--z-index-app));
+}
+
+#scene-navigation {
+  display: none;
+}
+
+:is(#sidebar.advanced-interface > #sidebar-tabs, #sidebar.advanced-interface .sidebar-tab:not(.advanced-interface-native-panel), .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout:not(.advanced-interface-native-panel)) {
+  --control-icon-color: var(--advanced-interface-text-color);
+  --control-hover-icon-color: var(--advanced-interface-hover-color);
+  --control-active-icon-color: var(--advanced-interface-selected-color);
+}
+
+/* Sidebar layout and tab states. */
+#sidebar {
+  padding-top: 56px;
+  padding-bottom: 16px;
+}
+
+#sidebar:not(.advanced-interface-ready) {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#hotbar:not(.advanced-interface-hotbar),
+#ui-left-column-1 > :is(#players, #scene-controls) {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#sidebar.advanced-interface {
+  --advanced-interface-tab-columns: repeat(3, minmax(0, 1fr));
+  --advanced-interface-row-width: calc(100cqw / var(--ui-scale, 1) - 32px);
+  position: relative;
+  padding-top: 52px;
+  width: calc(min(var(--advanced-interface-row-width), 100cqw / var(--ui-scale, 1) - 32px) + 16px);
+  pointer-events: none;
+}
+
+#scene-controls,
+#calendar-hud {
+  --control-size: 32px;
+}
+
+#calendar-hud .calendar-buttons > .calendar-button {
+  block-size: 32px;
+  inline-size: 32px;
+}
+
+#scene-controls .ui-control {
+  --control-size: 32px;
+  --control-bg-color: var(--advanced-interface-toolbar-color);
+  width: 32px;
+  height: 32px;
+  --control-hover-bg-color: var(--control-bg-color) !important;
+  --control-active-bg-color: var(--control-bg-color) !important;
+  --control-hover-border-color: var(--advanced-interface-hover-color) !important;
+  --control-active-border-color: var(--advanced-interface-selected-color) !important;
+  --control-hover-icon-color: var(--advanced-interface-hover-color) !important;
+  --control-active-icon-color: var(--advanced-interface-selected-color) !important;
+  --advanced-interface-button-icon-color: var(--advanced-interface-text-color);
+  color: var(--advanced-interface-button-icon-color) !important;
+  background: var(--control-bg-color) !important;
+  border-color: var(--control-border-color) !important;
+  box-shadow: none !important;
+}
+
+#sidebar > #sidebar-tabs {
+  position: absolute;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+#sidebar > #sidebar-tabs > menu {
+  flex: none;
+  gap: 0;
+}
+
+#sidebar > #sidebar-tabs > menu > li:has(> [data-action="toggleState"]) {
+  display: none;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs {
+  top: 12px;
+  bottom: 12px;
+  right: 12px;
+  width: calc(var(--advanced-interface-row-width) + 8px);
+  max-width: calc(100cqw / var(--ui-scale, 1) - 24px);
+  padding: 4px;
+  scrollbar-width: none;
+  pointer-events: none;
+}
+
+#sidebar.advanced-interface.advanced-interface-has-bottom-row {
+  padding-bottom: 44px;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  column-gap: 0;
+  grid-template-columns: var(--advanced-interface-tab-columns);
+  grid-template-rows: 32px minmax(0, 1fr) 32px;
+  pointer-events: none;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li {
+  pointer-events: auto;
+  position: relative;
+}
+
+/* Open tabs stretch across the row, so the pip stays pinned to the leader icon instead of the row's last action. */
+#sidebar.advanced-interface > #sidebar-tabs > menu > li > .notification-pip {
+  left: 24px;
+  right: auto;
+  z-index: 2;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li:has(> [data-tab][aria-pressed="true"])::after {
+  content: "";
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 4px;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li.advanced-interface-bottom-row:has(> [data-tab][aria-pressed="true"])::after {
+  inset: auto 0 100%;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li,
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)) {
+  transition: none !important;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li.advanced-interface-pinned,
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)).advanced-interface-pinned {
+  transition: opacity var(--ui-fade-delay) var(--ui-fade-duration) !important;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li.advanced-interface-pinned:not(:hover, :has(:focus-visible), :is(.advanced-interface-panel-unmuted, .advanced-interface-drop-target), .advanced-interface-always-shown),
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)).advanced-interface-pinned:not(:hover, :has(:focus-visible), .advanced-interface-tab-unmuted, .advanced-interface-always-shown) {
+  opacity: var(--ui-fade-opacity);
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li.advanced-interface-pinned:is(:hover, :has(:focus-visible), :is(.advanced-interface-panel-unmuted, .advanced-interface-drop-target)),
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)).advanced-interface-pinned:is(:hover, :has(:focus-visible), .advanced-interface-tab-unmuted) {
+  transition: opacity var(--ui-fade-duration) !important;
+}
+
+#sidebar.advanced-interface .advanced-interface-tab-actions {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  top: 0;
+  display: flex;
+  gap: 0;
+}
+
+#sidebar.advanced-interface .advanced-interface-tab-actions[hidden] {
+  display: none;
+}
+
+#sidebar.advanced-interface .advanced-interface-tab-actions button {
+  box-sizing: border-box;
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+#sidebar.advanced-interface .advanced-interface-tab-actions button[aria-pressed="true"] {
+  color: var(--color-text-accent);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :where(.advancedTime-sidebar) button.ui-control.icon,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) button.jump-to-bottom {
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+}
+
+#sidebar.advanced-interface > #sidebar-tabs [data-tab] {
+  --control-hover-bg-color: var(--control-bg-color);
+  --control-bg-color: var(--advanced-interface-toolbar-color);
+  --control-active-bg-color: var(--advanced-interface-toolbar-color);
+  background: var(--advanced-interface-tab-color, var(--advanced-interface-toolbar-color)) !important;
+  position: relative;
+  justify-content: flex-start;
+  padding: 0;
+  gap: 0;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs [data-tab]:is(:hover, :focus-visible)::before,
+#sidebar.advanced-interface > #sidebar-tabs li:is(:hover, :has(:focus-visible)) > [data-tab]::before,
+#sidebar.advanced-interface > #sidebar-tabs :is(.advanced-interface-panel-unmuted, .advanced-interface-drop-target) > [data-tab]::before {
+  color: var(--advanced-interface-hover-color);
+}
+
+#sidebar.advanced-interface :is(button, a.button, [role="button"], .ui-control),
+.sidebar-tab:not(:where(.compendium-directory)).sidebar-popout :is(button, a.button, [role="button"], .ui-control),
+.chat-popout > .window-content :is(button, a.button, [role="button"], .ui-control) {
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li.advanced-interface-always-shown,
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)).advanced-interface-pinned.advanced-interface-always-shown {
+  opacity: 1;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li:is(.advanced-interface-panel-unmuted, .advanced-interface-drop-target),
+#sidebar.advanced-interface > #sidebar-tabs > menu > li:has(:focus-visible) {
+  opacity: 1;
+  transition: opacity var(--ui-fade-duration);
+}
+
+#sidebar.advanced-interface > #sidebar-tabs button {
+  --control-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs [data-tab][aria-pressed="true"] {
+  width: 100%;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs [data-tab]::before {
+  color: var(--control-icon-color);
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#sidebar.advanced-interface .advanced-interface-tab-label {
+  display: none;
+  margin-inline-start: 7px;
+  padding-right: var(--advanced-interface-tab-actions-width, 64px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-weight: normal;
+  text-align: left;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs [data-tab].icon > .advanced-interface-tab-label {
+  margin-inline-start: 31px;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content.expanded) [data-tab][aria-pressed="true"] > .advanced-interface-tab-label {
+  display: block;
+}
+
+#sidebar.advanced-interface:not(:has(#sidebar-content.expanded)) > #sidebar-tabs [data-tab] {
+  width: 32px;
+}
+
+#sidebar.advanced-interface #sidebar-content {
+  display: grid;
+  grid-template-columns: var(--advanced-interface-tab-columns);
+  grid-template-rows: minmax(0, 1fr);
+  position: relative;
+  right: 0;
+  align-items: start;
+  gap: 0;
+  width: var(--advanced-interface-row-width);
+  max-width: calc(100cqw / var(--ui-scale, 1) - 32px);
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: auto;
+  transition: none;
+  pointer-events: none;
+  padding-bottom: 8px;
+}
+
+#sidebar.advanced-interface #sidebar-content:not(.expanded) {
+  display: none;
+}
+
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)) {
+  grid-row: 1;
+  height: max-content;
+  max-height: 100%;
+  min-height: 0;
+  pointer-events: auto;
+}
+
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)) > :is(.directory-list, .directory-wrapper, .chat-scroll, .combat-tracker, .advanced-interface-utility-content),
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-matched-popout > .window-content > :is(.directory-list, .directory-wrapper, .chat-scroll, .combat-tracker, .advanced-interface-utility-content) {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-matched-popout:not(.advancedControls-sidebar) {
+  height: auto !important;
+  max-height: calc(100vh / var(--ui-scale, 1) - 32px);
+}
+
+body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface-matched-popout {
+  max-height: calc(100vh / var(--ui-scale, 1));
+}
+
+/* Utility panels lack Foundry's flexcol class; without it their scroll region can't shrink to the panel height. */
+#sidebar.advanced-interface #sidebar-content > :is(.advancedPlayers-sidebar, .advancedTime-sidebar).active {
+  display: flex;
+  flex-direction: column;
+}
+
+#sidebar.advanced-interface:has(#sidebar-content) > #sidebar-tabs [data-tab="advancedControls"] > .advanced-interface-tab-label {
+  display: none;
+}
+
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)):has(:focus-visible),
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab:not(:where(.compendium-directory)).advanced-interface-tab-unmuted {
+  opacity: 1;
+  transition: opacity var(--ui-fade-duration);
+}
+
+/* Chromium reserves space for the native clear button even when the search is empty, clipping the placeholder. */
+:is(#sidebar.advanced-interface, .sidebar-popout) input[type="search"]:placeholder-shown::-webkit-search-cancel-button {
+  display: none;
+}
+
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab.advanced-interface-bottom-row > .directory-footer:not(:has(*)) {
+  display: none;
+}
+
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab.advanced-interface-bottom-row > .directory-list:not(:has(*)) {
+  margin-top: -4px;
+}
+
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab.advanced-interface-bottom-row :is(.placeable-tab, #players, .chat-form, #chat-message) {
+  flex-direction: column-reverse;
+}
+
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab.advanced-interface-bottom-row #hotbar.advanced-interface-hotbar #hotbar-controls-right {
+  order: 1;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+#sidebar.advanced-interface #sidebar-content > .chat-sidebar.advanced-interface-bottom-row .chat-scroll .chat-log {
+  flex-direction: column;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).directory .directory-header search.advanced-interface-search {
+  flex-wrap: nowrap;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).directory .directory-header search.advanced-interface-search input {
+  min-width: 0;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).directory .directory-header .advanced-interface-create {
+  flex: none;
+  position: relative;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).directory .directory-header .advanced-interface-create.icon-plus::after,
+.advanced-interface-chat-style .folder-header .create-button.icon-plus::after {
+  content: "\e59e";
+  font-family: var(--fa-family-classic);
+  font-weight: 900;
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.5rem;
+  background: black;
+  color: var(--color-light-1);
+  padding: 1px;
+  border-radius: 100%;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).directory .directory-header .advanced-interface-create.icon-plus:hover::after {
+  color: var(--advanced-interface-hover-color);
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar {
+  --hotbar-size: 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: none;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  transform: none;
+  overflow-x: clip;
+}
+
+.macros-sidebar.advanced-interface-macro-directory-hidden > :is(.directory-header, .directory-list, .directory-footer),
+.macros-sidebar.advanced-interface-macro-directory-hidden > .window-content > :is(.directory-header, .directory-list, .directory-footer) {
+  display: none;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot,
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right .ui-control {
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+  background: var(--advanced-interface-hotbar-control-background, var(--control-bg-color)) !important;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--advanced-interface-button-icon-color) !important;
+  box-shadow: none;
+  outline: none;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot {
+  background: var(--slot-color) !important;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot:is(:hover, :focus-visible),
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right .ui-control:is(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-hover-color);
+  background: var(--advanced-interface-hotbar-control-background, var(--control-hover-bg-color)) !important;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot.drop-target:not(:hover, :focus-within) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-selected-color);
+  background: var(--advanced-interface-hotbar-control-background, var(--control-active-bg-color)) !important;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot .slot-icon {
+  border-radius: 6px;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot .key {
+  background: transparent;
+  color: var(--key-text-color) !important;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .hotbar-controls {
+  height: auto;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right {
+  --advanced-interface-hotbar-control-background: transparent;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  justify-content: start;
+  order: -1;
+  align-items: center;
+  gap: 8px;
+  background: var(--advanced-interface-toolbar-background);
+  border-radius: 6px;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right > div {
+  display: contents;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-page-controls {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  width: auto;
+  height: 32px;
+  gap: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-page-controls > :is(button, .hotbar-page-number) {
+  --button-size: 32px;
+  --control-size: 32px;
+  width: 100%;
+  height: 32px;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right button,
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .hotbar-page-number {
+  flex: none;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .page-prev {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .page-next,
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar [data-action="lock"] {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar [data-action="clear"] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .hotbar-page-number {
+  position: static;
+  margin: 0;
+  grid-column: 2;
+  grid-row: 1;
+  width: 32px;
+  height: 32px;
+  line-height: 30px;
+  font-size: var(--font-size-16);
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right button {
+  --button-size: 32px;
+  --control-size: 32px;
+  font-size: var(--font-size-16);
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-page-controls .hotbar-page-control::before {
+  transform: none;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-page-controls > :is(.page-prev, .page-next, .hotbar-page-number) {
+  display: none;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .advanced-interface-hotbar-pages {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .advanced-interface-hotbar-pages > button {
+  --button-size: 32px;
+  --control-size: 32px;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-16);
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar .advanced-interface-hotbar-pages > button:not(.active, :hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--color-text-primary);
+  color: var(--color-text-primary) !important;
+}
+
+#hotbar.advanced-interface-hotbar #hotbar-controls-left {
+  display: none;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-chat-style {
+  --advanced-interface-card-background: var(--dnd5e-chat-background, var(--advanced-interface-chat-card-background, var(--chat-message-background, var(--advanced-interface-card-color))));
+  --advanced-interface-card-border: var(--advanced-interface-card-border-color);
+  --advanced-interface-toolbar-background: var(--advanced-interface-toolbar-color);
+  background: transparent;
+  font-size: var(--font-size-14);
+  row-gap: 8px;
+}
+
+/* Managed popout framing and headers. */
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-chat-style.sidebar-popout > .window-content {
+  background: transparent;
+  row-gap: 8px;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-matched-popout {
+  width: var(--advanced-interface-popout-width);
+  min-width: var(--advanced-interface-popout-width);
+  max-width: var(--advanced-interface-popout-width);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  gap: 4px;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-matched-popout > .window-content {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-matched-popout > .window-header {
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+  flex: 0 0 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  gap: 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--advanced-interface-tab-color, var(--advanced-interface-toolbar-color));
+  color: var(--color-text-primary);
+  box-shadow: none;
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-matched-popout .window-header .header-control {
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+  background: transparent;
+}
+
+.advanced-interface-matched-popout .window-header :is(.window-icon, .header-control) {
+  --button-size: 32px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-matched-popout .window-header .hidden {
+  display: none;
+}
+
+.advanced-interface-popout-leader {
+  position: relative;
+  color: var(--control-icon-color) !important;
+}
+
+.advanced-interface-matched-popout:is(:hover, :focus-within) > .window-header > .advanced-interface-popout-leader > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-matched-popout .window-header .window-title {
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: normal;
+  font-size: var(--font-size-16);
+  line-height: 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--control-icon-color) !important;
+}
+
+.advanced-interface-matched-popout .window-header [hidden] {
+  display: none;
+}
+
+.advanced-interface-chat-style :is(.flexcol, .flexrow, .placeable-entry, .sound, .sound-controls) {
+  gap: 8px;
+}
+
+#scene-controls,
+#scene-controls > menu {
+  gap: 4px;
+}
+
+#scene-controls .ui-control:not(:disabled):is(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-hover-color);
+  background: var(--control-hover-bg-color) !important;
+}
+
+#scene-controls .ui-control:is(.active, [aria-pressed="true"], [aria-expanded="true"]):not(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-selected-color);
+  background: var(--control-active-bg-color) !important;
+}
+
+/* Directory toolbars and search controls. */
+.advanced-interface-chat-style.directory .directory-header {
+  margin-block: 0;
+  gap: 8px;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(
+  .directory-header search,
+  .placeables-sidebar search,
+  .combat-tracker-header > .encounters,
+  .combat-tracker-header > .encounter-controls,
+  .combat-controls,
+  .advanced-interface-time-controls,
+  #chat-controls,
+  #hotbar-controls-right,
+  #performance-stats
+) {
+  background: var(--advanced-interface-toolbar-background, var(--advanced-interface-toolbar-color));
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(
+  .directory-header search,
+  .placeables-sidebar search,
+  .combat-tracker-header,
+  .combat-controls,
+  .global-control,
+  .advanced-interface-time-controls,
+  #performance-stats
+) :is(label, strong) {
+  color: inherit;
+}
+
+#chat-message .editor-menu {
+  background: var(--advanced-interface-toolbar-color);
+}
+
+.advanced-interface-chat-style.directory .directory-header search,
+.advanced-interface-chat-style.placeables-sidebar search,
+.advanced-interface-chat-style .combat-tracker-header > .encounters,
+.advanced-interface-chat-style .combat-tracker-header > .encounter-controls,
+.advanced-interface-chat-style .combat-controls,
+.advanced-interface-chat-style .directory-footer > button {
+  background: var(--advanced-interface-toolbar-background);
+  box-sizing: border-box;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  border-radius: 6px;
+  padding: 0;
+  gap: 8px;
+  align-items: center;
+}
+
+.advanced-interface-chat-style .directory-header search {
+  gap: 0;
+}
+
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .directory-header search {
+  gap: 0;
+}
+
+.advanced-interface-chat-style .directory-header search input {
+  margin-inline: 0;
+}
+
+.advanced-interface-chat-style :is(
+  .directory-header search,
+  search,
+  nav.tabs,
+  .combat-tracker-header,
+  .combat-controls
+) :is(button.icon, button.inline-control) {
+  --button-size: 32px;
+  --control-size: 32px;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style :is(.directory-header search, search) input {
+  height: 32px;
+  line-height: 32px;
+  padding-inline: 4px;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style.placeables-sidebar search {
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(search input, input[type="search"]) {
+  border-radius: 2px;
+  height: 24px;
+  line-height: 16px;
+  margin-block: 4px;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(search input, input[type="search"]):focus-visible {
+  outline-offset: 5px;
+}
+
+:is(#sidebar.advanced-interface .advanced-interface-chat-style, .sidebar-tab.sidebar-popout.advanced-interface-chat-style) search > :is(.toggle-search-mode, .filter, .advanced-interface-search-icon) {
+  --advanced-interface-search-leader-color: var(--advanced-interface-text-color);
+  color: var(--advanced-interface-text-color) !important;
+}
+
+.advanced-interface-chat-style.placeables-sidebar search > .advanced-interface-placeable-icon.advanced-interface-search-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style.placeables-sidebar search > .advanced-interface-search-icon > .advanced-interface-icon-disc {
+  background: var(--advanced-interface-disc-color, var(--advanced-interface-hover-color));
+}
+
+.advanced-interface-chat-style.placeables-sidebar search:is(:hover, :focus-within) > .advanced-interface-search-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style.placeables-sidebar search:is(:hover, :focus-within) > .advanced-interface-search-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-chat-style.placeables-sidebar search input {
+  flex: 1;
+  min-width: 0;
+  margin-inline: 0;
+  padding-inline: 4px;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .control-buttons {
+  gap: 0;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .combat-control-lg {
+  --button-size: 32px;
+  height: 32px;
+  line-height: 32px;
+  padding-block: 0;
+  gap: 8px;
+}
+
+.advanced-interface-chat-style .combat-controls .combat-control-lg {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style .combat-controls .combat-control-lg > i {
+  display: inline-flex;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.advanced-interface-chat-style .combat-tracker-header > .encounters,
+.advanced-interface-chat-style .combat-tracker-header > .encounter-controls {
+  padding-inline: 0;
+  gap: 0;
+}
+
+.advanced-interface-chat-style .combat-controls {
+  gap: 0;
+}
+
+.advanced-interface-chat-style .combat-controls:empty {
+  display: none;
+}
+
+.advanced-interface-chat-style.directory .directory-list {
+  padding: 0 var(--advanced-interface-scroll-gap, 0px) 4px 0;
+}
+
+.advanced-interface-chat-style .combat-tracker {
+  padding: 0 var(--advanced-interface-scroll-gap, 0px) 0 0;
+}
+
+/* Directory cards, scene indicators, and folder headers. */
+.advanced-interface-chat-style .directory-item.entry,
+.advanced-interface-chat-style .combatant,
+.advanced-interface-chat-style .placeable-entry,
+.advanced-interface-chat-style.playlists-sidebar .global-control,
+.advanced-interface-chat-style.settings-sidebar > section,
+.advanced-interface-chat-style.settings-sidebar > .window-content > section {
+  background: var(--advanced-interface-card-background);
+  border: 1px solid var(--advanced-interface-card-border);
+  border-radius: 6px;
+  padding: 8px;
+  margin-block: 0;
+  color: var(--color-text-primary);
+}
+
+.advanced-interface-chat-style .directory-item.entry:is(:hover, :focus-within) {
+  border-color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style .directory-item.entry:is(.context, .active):not(:hover, :focus-within) {
+  border-color: var(--advanced-interface-selected-color);
+}
+
+.advanced-interface-chat-style .directory-item.folder {
+  border: none;
+  margin-block: 0;
+}
+
+.advanced-interface-chat-style :is(.directory-list, .subdirectory) > .directory-item:not(:last-child),
+.advanced-interface-chat-style .combat-tracker > .combatant:not(:last-child) {
+  margin-block-end: 4px;
+}
+
+.advanced-interface-chat-style.directory .directory-item.folder .directory-item.folder {
+  border: none;
+}
+
+.advanced-interface-chat-style.directory .directory-item.folder {
+  gap: 0;
+}
+
+.advanced-interface-chat-style.directory .directory-item .subdirectory {
+  border: none;
+  padding-inline-start: 0;
+}
+
+.advanced-interface-chat-style.directory .subdirectory > .directory-item.folder {
+  margin-inline-start: 8px;
+}
+
+.advanced-interface-chat-style.directory .subdirectory > .directory-item:is(.entry, .playlist) {
+  width: calc(100% - 8px);
+  min-width: 0;
+  margin-inline-start: 8px;
+  box-sizing: border-box;
+}
+
+.advanced-interface-chat-style.directory .directory-item .subdirectory:has(> .directory-item) {
+  padding-block: 4px 0;
+}
+
+.advanced-interface-chat-style.directory .directory-item .subdirectory:not(:has(> *)) {
+  display: none;
+}
+
+.advanced-interface-chat-style.directory .directory-item.entry::after {
+  border-radius: inherit;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style :is(.advanced-interface-card, .directory-item.entry, .folder-header):is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within) > i:has(> .advanced-interface-icon-disc),
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style :is(.advanced-interface-card, .directory-item.entry):is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within) > :is(header, .compendium-name) > i:has(> .advanced-interface-icon-disc),
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style .directory-item.folder:is(.context, .active) > .folder-header:not(:hover, :focus-within) > i {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style :is(.advanced-interface-card, .directory-item.entry, .folder-header):is(.context, .active, .advanced-interface-card-menu-open, :active) > i > .advanced-interface-icon-disc,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style :is(.advanced-interface-card, .directory-item.entry):is(.context, .active, .advanced-interface-card-menu-open, :active) > :is(header, .compendium-name) > i > .advanced-interface-icon-disc,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style .directory-item.folder:is(.context, .active) > .folder-header > i > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-chat-style:is(.tables-sidebar, .cards-sidebar, .journal-sidebar, .actors-sidebar, .items-sidebar, .macros-sidebar) {
+  --sidebar-item-height: 64px;
+}
+
+.advanced-interface-chat-style.scenes-sidebar {
+  --sidebar-scene-height: 64px;
+}
+
+.advanced-interface-chat-style.scenes-sidebar .directory-item.entry.scene {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.advanced-interface-chat-style:is(.scenes-sidebar, .compendium-sidebar) .directory-item.entry:is(.scene, .compendium) {
+  --advanced-interface-thumbnail-fade: none;
+}
+
+.advanced-interface-card > .advanced-interface-card-header-background {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background: linear-gradient(to bottom,
+    rgb(var(--advanced-interface-card-header-tint) / var(--advanced-interface-card-header-darkness)) 0 var(--advanced-interface-card-header-height, 32px),
+    transparent var(--advanced-interface-card-header-height, 32px));
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.advanced-interface-chat-style:is(.scenes-sidebar, .compendium-sidebar) .directory-item.entry:is(.scene, .compendium) > .advanced-interface-card-header-background {
+  z-index: -1;
+}
+
+.advanced-interface-chat-style.scenes-sidebar .scene .entry-name {
+  position: static;
+  flex: 1;
+  min-width: 0;
+  align-self: flex-start;
+  inset: auto;
+  font-size: var(--font-size-16);
+  height: 32px;
+  line-height: 32px;
+  margin: 0;
+  padding: 0 8px 0 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.advanced-interface-chat-style .directory-item.entry.document {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  height: 64px;
+  min-height: 64px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.advanced-interface-chat-style .directory-item.entry.document > img.thumbnail {
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+  mask-image: var(--advanced-interface-thumbnail-fade);
+  border: none;
+}
+
+.advanced-interface-chat-style .directory-item.entry.document > .advanced-interface-document-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style .directory-item.entry.document > .entry-name {
+  position: static;
+  flex: 1;
+  min-width: 0;
+  align-self: flex-start;
+  height: 32px;
+  line-height: 32px;
+  margin-inline-start: 8px;
+  padding: 0 8px 0 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-16);
+  font-weight: normal;
+  box-shadow: none;
+}
+
+.advanced-interface-chat-style .directory-item.entry.document > .advanced-interface-document-icon + .entry-name {
+  margin-inline-start: 0;
+}
+
+.advanced-interface-chat-style .directory-item.entry.document:is(:hover, :focus-within, .context, .active) > .advanced-interface-document-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style .directory-item.entry.document:is(.context, .active):not(:hover, :focus-within) > .advanced-interface-document-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+.advanced-interface-chat-style .directory-item.entry.document:is(:hover, :focus-within, .context, .active) > .advanced-interface-document-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-scene-title-icon {
+  color: var(--color-text-primary);
+}
+
+.advanced-interface-scene-indicators {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  z-index: 1;
+  color: var(--color-light-1);
+  font-size: var(--font-size-16);
+  text-shadow: none;
+}
+
+.advanced-interface-scene-user {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+.advanced-interface-scene-indicators > button {
+  --control-size: 32px;
+  --button-size: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.advanced-interface-scene-users {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 32px;
+  grid-template-rows: 32px;
+  place-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+.advanced-interface-card-thumbnail > .advanced-interface-scene-users {
+  left: 64px;
+}
+
+.advanced-interface-scene-levels {
+  list-style: none;
+  padding-inline-start: 40px;
+}
+
+.advanced-interface-scene-levels:not(:last-child) {
+  margin-bottom: 4px;
+}
+
+.advanced-interface-scene-levels > ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+
+.advanced-interface-scene-levels > ul > li {
+  background: var(--advanced-interface-card-background);
+  border-radius: 6px;
+  overflow: hidden;
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--advanced-interface-card-border);
+}
+
+.advanced-interface-scene-levels .advanced-interface-scene-level {
+  display: flex;
+  width: 100%;
+  min-height: 32px;
+  height: auto;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: normal;
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+.advanced-interface-scene-level > i {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.advanced-interface-scene-level > .ellipsis {
+  flex: 1;
+  min-width: 0;
+}
+
+.advanced-interface-scene-level > .advanced-interface-scene-user {
+  flex: 0 0 20px;
+  margin-inline: 6px;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .directory-item.entry.compendium {
+  cursor: var(--cursor-pointer);
+  height: 64px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.advanced-interface-chat-style.journal-sidebar .directory-item.entry .entry-name {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 40px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: normal;
+  line-height: 32px;
+}
+
+.advanced-interface-journal-icon {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-16);
+  color: var(--color-text-primary);
+}
+
+.journalentry:is(.context, .active, :active):not(:hover, :focus-within) > .advanced-interface-journal-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+.journalentry:is(.context, .active, :active, :hover, :focus-within) > .advanced-interface-journal-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+/* Draw card outlines above images and text without intercepting controls. */
+.advanced-interface-chat-style :is(.directory-item.entry, .sound, .playlist, .combatant, .placeable-entry, .advanced-interface-scene-levels > ul > li),
+.advanced-interface-chat-style.settings-sidebar :is(section.info, section.advanced-interface-settings-section) {
+  position: relative;
+}
+
+.advanced-interface-chat-style :is(.directory-item.entry, .sound, .playlist, .combatant, .placeable-entry, .advanced-interface-scene-levels > ul > li)::after,
+.advanced-interface-chat-style.settings-sidebar :is(section.info, section.advanced-interface-settings-section)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--advanced-interface-card-border);
+  pointer-events: none;
+  transition: none;
+}
+
+.advanced-interface-chat-style :is(.directory-item.entry, .sound, .playlist, .combatant, .placeable-entry, .advanced-interface-scene-levels > ul > li):is(:hover, :focus-within):not(:has(.advanced-interface-card:is(:hover, :focus-within)))::after,
+.advanced-interface-chat-style.settings-sidebar :is(section.info, section.advanced-interface-settings-section):is(:hover, :focus-within):not(:has(.advanced-interface-card:is(:hover, :focus-within)))::after {
+  box-shadow: inset 0 0 0 1px var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style :is(.directory-item.entry, .sound, .playlist, .combatant, .placeable-entry, .advanced-interface-scene-levels > ul > li):is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within):not(:has(.advanced-interface-card:active))::after,
+.advanced-interface-chat-style.settings-sidebar :is(section.info, section.advanced-interface-settings-section):is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within):not(:has(.advanced-interface-card:active))::after {
+  box-shadow: inset 0 0 0 1px var(--advanced-interface-selected-color);
+}
+
+/* Banners scale to the 68px card pitch (64px card + 4px gap) so packs sliced from one composite image line up;
+   each card shows the top 64px of its slice. */
+.advanced-interface-chat-style.compendium-sidebar .compendium-banner {
+  position: absolute;
+  inset: 0 auto auto 0;
+  transform: none;
+  box-sizing: border-box;
+  width: auto;
+  max-width: none;
+  height: 68px;
+  object-fit: cover;
+  object-position: left top;
+  opacity: 1;
+  mask-image: var(--advanced-interface-thumbnail-fade);
+  border: none;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium .compendium-name {
+  inset: 0 var(--advanced-interface-pack-status-width, 40px) auto 32px;
+  height: 32px;
+  padding: 0;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium .compendium-name strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium :is(.compendium-name, .compendium-name strong, .compendium-footer, .compendium-footer .source) {
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium-name > i.advanced-interface-compendium-icon {
+  position: relative;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium:is(:hover, :focus-within) .compendium-name > i.advanced-interface-compendium-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium:is(.context, .active):not(:hover, :focus-within) .compendium-name > i.advanced-interface-compendium-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium:is(:hover, :focus-within, .context, .active) .compendium-name > i.advanced-interface-compendium-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium .compendium-footer {
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  right: 0;
+  height: 32px;
+  gap: 8px;
+  padding: 0;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium-footer .source {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium .status-icons {
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+  z-index: 2;
+}
+
+.advanced-interface-chat-style.compendium-sidebar .compendium-name > i,
+.advanced-interface-chat-style.compendium-sidebar .compendium-footer > i,
+.advanced-interface-chat-style.compendium-sidebar .status-icons > * {
+  --control-size: 32px;
+  --button-size: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style .directory-item.folder > .folder-header {
+  --folder-padding: 0px;
+  padding: 0;
+  gap: 0;
+  height: 32px;
+  flex: none;
+  border-radius: 6px;
+}
+
+.advanced-interface-chat-style .folder-header > i,
+.advanced-interface-chat-style .folder-header .create-button {
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style .folder-header:hover > i,
+.advanced-interface-chat-style .folder-header:hover .folder-name,
+.advanced-interface-chat-style.scenes-sidebar .scene:hover > .advanced-interface-scene-title-icon,
+.advanced-interface-chat-style.scenes-sidebar .scene:hover .entry-name {
+  color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style.scenes-sidebar .scene:is(.context, .active) > .advanced-interface-scene-title-icon,
+.advanced-interface-chat-style.scenes-sidebar .scene:is(.context, .active) .entry-name {
+  color: var(--color-warm-2);
+}
+
+.advanced-interface-chat-style .folder-header .folder-name {
+  min-width: 0;
+}
+
+.advanced-interface-chat-style .directory-item.folder.droptarget > .folder-header .folder-name {
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style .directory-item.folder.droptarget > .folder-header > i {
+  transform: none;
+  text-shadow: none;
+  margin: 0;
+}
+
+.advanced-interface-chat-style .folder-header > i {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+}
+
+.advanced-interface-chat-style .directory-item.folder > .folder-header:is(:hover, :focus-within) > i.advanced-interface-folder-icon,
+.advanced-interface-chat-style .directory-item.folder.droptarget > .folder-header > i.advanced-interface-folder-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style .directory-item.folder:is(.context, .active) > .folder-header:not(:hover, :focus-within) > i.advanced-interface-folder-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+.advanced-interface-chat-style .directory-item.folder:is(.context, .active) > .folder-header > i.advanced-interface-folder-icon > .advanced-interface-icon-disc,
+.advanced-interface-chat-style .directory-item.folder.droptarget > .folder-header > i.advanced-interface-folder-icon > .advanced-interface-icon-disc,
+.advanced-interface-chat-style .directory-item.folder > .folder-header:is(:hover, :focus-within) > i.advanced-interface-folder-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-chat-style .folder-header :is(.create-button, .advanced-interface-folder-sort) {
+  --button-size: 32px;
+  --control-size: 32px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.advanced-interface-chat-style .folder .folder > .folder-header {
+  top: 0;
+}
+
+/* Settings sections and toolbar. */
+.advanced-interface-chat-style.settings-sidebar {
+  --advanced-interface-settings-color: var(--color-text-secondary);
+}
+
+.advanced-interface-chat-style.settings-sidebar.active,
+.advanced-interface-chat-style.settings-sidebar.sidebar-popout > .window-content {
+  padding: 0;
+  padding-inline-end: var(--advanced-interface-scroll-gap, 0px);
+  gap: 4px;
+}
+
+.advanced-interface-chat-style.settings-sidebar section.advanced-interface-settings-section {
+  padding: 0;
+}
+
+.advanced-interface-chat-style.settings-sidebar :is(section.info, section.advanced-interface-settings-section) {
+  flex: none;
+  background: var(--advanced-interface-card-background);
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--advanced-interface-card-border);
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: normal;
+  color: var(--advanced-interface-settings-color);
+  text-align: left;
+}
+
+.advanced-interface-chat-style.settings-sidebar :is(.info > .title, .info .subtitle, .info .build, .info .system, .info .label, .info .value, .sidebar-info .system-info, h4.divider, .advanced-interface-settings-button) {
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: normal;
+  color: var(--advanced-interface-settings-color);
+  text-align: left;
+}
+
+.advanced-interface-chat-style.settings-sidebar .info :is(.build, .system) {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.advanced-interface-chat-style.settings-sidebar .info :is(.label, .value) {
+  flex: none;
+}
+
+.advanced-interface-chat-style.settings-sidebar section.info {
+  height: auto;
+  padding: 0;
+}
+
+.advanced-interface-chat-style.settings-sidebar .info :is(.subtitle, .build, .system) {
+  padding-inline-start: 0;
+  font-size: var(--font-size-16);
+  line-height: 32px;
+}
+
+.advanced-interface-chat-style.settings-sidebar section.sidebar-info {
+  height: 112px;
+}
+
+.advanced-interface-chat-style.settings-sidebar .info > .advanced-interface-release {
+  display: block;
+  padding-inline: 8px;
+}
+
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-release > .version {
+  display: inline;
+}
+
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-release > :is(.version, .build) {
+  padding: 0;
+  margin: 0;
+  flex: none;
+}
+
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-release > .build {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.advanced-interface-chat-style.settings-sidebar .info > .sidebar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+.advanced-interface-chat-style.settings-sidebar .sidebar-info .system-badge {
+  height: 32px;
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 0 8px;
+}
+
+.advanced-interface-chat-style.settings-sidebar .sidebar-info .links {
+  display: grid;
+  grid-template-columns: repeat(4, 32px) minmax(0, 1fr);
+  gap: 8px;
+  justify-content: start;
+  margin: 0;
+  padding: 0;
+  line-height: 32px;
+  color: var(--advanced-interface-settings-color);
+  column-gap: 0;
+}
+
+.advanced-interface-chat-style.settings-sidebar .sidebar-info .links li::after {
+  display: none;
+}
+
+
+
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-settings-section > h4.divider,
+.advanced-interface-chat-style.settings-sidebar .info > .title {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  height: 32px;
+  min-height: 32px;
+  border-bottom: 1px solid currentColor;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: normal;
+  line-height: 32px;
+  text-align: left;
+}
+
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-settings-section > h4.divider::before,
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-settings-section > h4.divider::after {
+  display: none;
+}
+
+.advanced-interface-settings-section-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-16);
+}
+
+.settings-sidebar .advanced-interface-settings-section:is(:hover, :focus-within) > :is(h4.divider, .title) > .advanced-interface-settings-section-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.settings-sidebar .advanced-interface-settings-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 32px);
+  gap: 0;
+}
+
+.settings-sidebar .advanced-interface-settings-button-divider {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 1px;
+  background: var(--advanced-interface-card-border, var(--color-cool-4));
+}
+
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-settings-actions {
+  gap: 0;
+}
+
+#sidebar.advanced-interface .settings-sidebar .advanced-interface-settings-actions {
+  gap: 0;
+}
+
+.settings-sidebar .advanced-interface-settings-actions > :not(.advanced-interface-settings-button) {
+  grid-column: 1 / -1;
+}
+
+.settings-sidebar .advanced-interface-settings-button {
+  --button-size: 32px;
+  --control-size: 32px;
+  --advanced-interface-button-icon-color: var(--advanced-interface-settings-color);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+}
+
+.settings-sidebar .advanced-interface-settings-button > i {
+  margin: 0;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-settings-toolbar {
+  display: flex;
+  overflow-x: clip;
+  align-items: center;
+  flex: none;
+  gap: 0;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--advanced-interface-toolbar-background);
+  color: var(--advanced-interface-text-color);
+}
+
+.settings-sidebar .advanced-interface-settings-toolbar > .advanced-interface-settings-button {
+  --advanced-interface-settings-color: var(--advanced-interface-text-color);
+  flex: none;
+}
+
+.settings-sidebar .advanced-interface-settings-toolbar > .advanced-interface-ui-config {
+  margin-inline-start: auto;
+}
+
+/* Placeables, playlists, and volume controls. */
+.advanced-interface-chat-style.placeables-sidebar nav.tabs[data-application-part="tabs"] {
+  display: none;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-directory {
+  padding: 0 var(--advanced-interface-scroll-gap, 0px) 0 0;
+  gap: 4px;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-tab {
+  gap: 8px;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .directory-wrapper {
+  margin-inline: 0;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-group > .placeable-directory {
+  padding-block-start: 4px;
+  padding-inline-start: 0;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-group[data-author-id] > .group-header {
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--sidebar-folder-color, var(--color-dark-1));
+  text-shadow: none;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-group[data-author-id] > .group-header > .color {
+  flex-basis: 16px;
+  width: 16px;
+  height: 16px;
+  margin-inline: 8px;
+  border: none;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .group-header > .meta {
+  display: inline-flex;
+  flex: 0 0 32px;
+  min-width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-inline-start: auto;
+  padding-inline-end: 8px;
+  box-sizing: border-box;
+  font-size: var(--font-size-16);
+  color: var(--advanced-interface-placeable-color, var(--color-text-primary));
+  opacity: 1;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .color {
+  box-sizing: border-box;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin-inline: 6px;
+  border-radius: 50%;
+}
+
+.advanced-interface-chat-style.placeables-sidebar :is(.placeable-entry, .group-header, .description, .controls) {
+  gap: 8px;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .controls {
+  gap: 0;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-entry {
+  width: 100%;
+  margin-inline-start: 0;
+  box-sizing: border-box;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+.advanced-interface-chat-style.placeables-sidebar :is(.description, .group-header) {
+  min-width: 0;
+  align-items: center;
+}
+
+.advanced-interface-chat-style.placeables-sidebar :is(.placeable-entry, .group-header) .label {
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style.placeables-sidebar .advanced-interface-placeable-icon {
+  display: inline-flex;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style.placeables-sidebar :is(.placeable-entry, .group-header):is(:hover, .hovered, :focus-within) {
+  --advanced-interface-placeable-color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-entry.active:not(:hover, :focus-within) {
+  --advanced-interface-placeable-color: var(--advanced-interface-selected-color);
+}
+
+.advanced-interface-chat-style.placeables-sidebar :is(.placeable-entry, .group-header) :is(.label, .advanced-interface-placeable-icon) {
+  color: var(--advanced-interface-placeable-color, var(--color-text-primary));
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar {
+  --entry-height: 32px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .global-control {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--advanced-interface-card-background);
+  border-color: var(--advanced-interface-card-border);
+  --control-icon-color: var(--advanced-interface-text-color);
+  --button-text-color: var(--advanced-interface-text-color);
+  --input-text-color: var(--advanced-interface-text-color);
+  color: var(--advanced-interface-text-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar > .global-volume {
+  display: none;
+}
+
+.playlists-sidebar.sidebar-popout > .window-content > .global-volume {
+  display: none;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar > .currently-playing.global-control,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar > .window-content > .currently-playing.global-control {
+  display: none;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .global-control > header {
+  height: 32px;
+  min-height: 32px;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  line-height: 32px;
+  cursor: var(--cursor-pointer);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .global-control > header strong {
+  min-width: 0;
+  font-size: var(--font-size-16);
+  font-weight: normal;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .global-control.expanded > header {
+  border-bottom: 1px solid var(--color-dark-5);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.global-control, .playlist) > header > .expand {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  font-size: var(--font-size-16);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .global-volume ol {
+  gap: 0;
+  padding: 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.global-volume li, .sound-playback) {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0;
+  height: 32px;
+  line-height: 32px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.global-volume li, .sound-playback) .volume-icon {
+  flex: 0 0 32px;
+  color: inherit;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: var(--font-size-16);
+}
+
+/* Font Awesome draws the three-wave speaker 1px right of the other volume glyphs. */
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.global-volume li, .sound-playback) .volume-icon.fa-volume-high::before {
+  margin-inline-start: -1px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .global-volume li > label {
+  flex: 0 0 96px;
+  min-width: 0;
+  font-size: var(--font-size-16);
+}
+
+.advancedVolume-sidebar .global-volume li > label {
+  box-sizing: border-box;
+  padding-inline-start: 8px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.global-volume li, .sound-playback) range-picker {
+  flex: 1;
+  min-width: 0;
+}
+
+.advancedVolume-sidebar .global-volume li > range-picker,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound-playback range-picker.sound-volume {
+  box-sizing: border-box;
+  flex: 0 0 128px;
+  padding-inline-end: 8px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar range-picker input[type="range"] {
+  height: 32px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar range-picker input[type="range"]:is(:hover, :focus-visible) {
+  --range-thumb-border-color: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound-playback .sound-timer {
+  flex: 1 1 auto;
+  order: 0;
+  box-sizing: content-box;
+  padding-inline-start: 8px;
+  color: inherit;
+  font-size: var(--font-size-16);
+  text-align: start;
+}
+
+/* Now playing row: elapsed / total time on the left, then the speaker button and volume slider on the right. */
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound-playback > :is(.volume-icon, range-picker.sound-volume) {
+  order: 1;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound-playback .sound-timer > * {
+  color: inherit;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.advanced-interface-sound-playback {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 64px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.advanced-interface-sound-playback > .sound-playback {
+  flex: 0 0 32px;
+  padding: 0 8px 0 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.advanced-interface-sound-playback > .sound-playback > :is(.volume-icon, range-picker.sound-volume) {
+  position: relative;
+  left: 32px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.advanced-interface-sound-playback > .sound-playback range-picker.sound-volume {
+  order: 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.advanced-interface-sound-playback > .sound-playback .sound-timer {
+  order: 2;
+  text-align: end;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.advanced-interface-sound-playback > .sound-playback .volume-icon {
+  order: -1;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist.directory-item.document {
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  border-top: none;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header {
+  height: 32px;
+  gap: 0;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--advanced-interface-toolbar-background);
+  color: var(--advanced-interface-text-color);
+  line-height: 32px;
+}
+
+/* The playlist card is a secondary control bar: Submenu, name, controls, then the expand shutter at the far right. */
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.playlist.directory-item.document, .playlist > .playlist-header) {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.playlist.directory-item.document, .playlist > .playlist-header)::after,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist-header > .advanced-interface-card-header-background {
+  display: none;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header > .expand {
+  order: 1;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist-header .playlist-name {
+  min-width: 0;
+  line-height: 32px;
+  font-size: var(--font-size-16);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist .playlist-sounds {
+  gap: 4px;
+  padding: 4px 0 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist:not(.expanded) .playlist-sounds {
+  padding: 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound {
+  position: relative;
+  box-sizing: border-box;
+  height: 32px;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--advanced-interface-card-border);
+  border-radius: 6px;
+  background: var(--advanced-interface-card-background);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound > header {
+  flex: 0 0 30px;
+  height: 30px;
+  gap: 0;
+  padding: 0 0 0 32px;
+  line-height: 30px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound > header > i {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  font-size: var(--font-size-16);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound > header > i.advanced-interface-sound-icon > .advanced-interface-icon-disc {
+  background: var(--advanced-interface-disc-color, var(--advanced-interface-hover-color)) !important;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.playing:not(:hover, :focus-within) > header > i.advanced-interface-sound-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound:is(:hover, :focus-within) > header > i.advanced-interface-sound-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound:is(.playing, :hover, :focus-within) > header > i.advanced-interface-sound-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header > i.advanced-interface-sound-icon {
+  position: relative;
+  color: var(--control-icon-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist.playing > .playlist-header:not(:hover, :focus-within) > i.advanced-interface-sound-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header:is(:hover, :focus-within) > i.advanced-interface-sound-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header.advanced-interface-card:is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within) > i.advanced-interface-sound-icon,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound:is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within) > header > i.advanced-interface-sound-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist.playing > .playlist-header > i.advanced-interface-sound-icon > .advanced-interface-icon-disc,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header:is(:hover, :focus-within) > i.advanced-interface-sound-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound > header > label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-16);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound-controls {
+  flex: none;
+  flex-wrap: nowrap;
+  gap: 0;
+  justify-content: flex-end;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound > .advanced-interface-card-menu-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 30px;
+  min-height: 30px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.sound-control, .pin) {
+  --button-size: 32px;
+  --control-size: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-16);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound > header .sound-control {
+  height: 30px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar :is(.global-control > header, .playlist-header):hover :is(.expand, strong, .playlist-name),
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound:hover > header > :is(i, label) {
+  color: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound:is(:hover, :focus-within) {
+  border-color: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist.playing > .playlist-header :is(.expand, .playlist-name),
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.playing > header > :is(i, label) {
+  color: var(--color-warm-2);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound.playing:not(:hover, :focus-within) {
+  border-color: var(--advanced-interface-selected-color);
+}
+
+.chat-sidebar .chat-form {
+  order: -1;
+  gap: 4px;
+  width: 100%;
+  padding-inline: 0;
+}
+
+#sidebar-content #chat {
+  gap: 4px;
+  padding: 0;
+}
+
+/* Core's Chat Background option would paint a solid backdrop behind the managed chat panel. */
+#sidebar.advanced-interface #sidebar-content > .chat-sidebar.with-background {
+  background: transparent;
+}
+
+.chat-sidebar .chat-scroll {
+  direction: ltr;
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+  padding-inline-end: var(--advanced-interface-scroll-gap, 0px);
+}
+
+.chat-sidebar .chat-log {
+  max-width: none;
+}
+
+.chat-sidebar .chat-log > .chat-message {
+  margin-inline: 0;
+}
+
+.sidebar-tab.chat-sidebar.advanced-interface-chat-style.sidebar-popout > .window-content {
+  gap: 4px;
+}
+
+.chat-sidebar .chat-scroll .chat-log {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+}
+
+.chat-sidebar .chat-scroll .chat-log > * {
+  flex: none;
+  margin-block: 0;
+}
+
+.advanced-interface-panel-scroll .chat-scroll.scrolled {
+  mask-image: none;
+}
+.chat-sidebar .jump-to-bottom {
+  display: none;
+}
+
+#chat-notifications {
+  grid-template-rows: 1fr;
+}
+
+#chat-notifications > :is(#chat-message, #chat-controls) {
+  display: none;
+}
+
+.chat-sidebar .chat-form > #chat-controls {
+  order: -1;
+  flex: 0 0 32px;
+  height: 32px;
+  border-radius: 6px;
+  padding: 0;
+}
+
+#chat-controls,
+.chat-sidebar #chat-controls .control-buttons,
+#chat-controls > .split-button {
+  gap: 0;
+}
+
+.chat-sidebar #chat-controls {
+  justify-content: space-between;
+}
+
+.chat-sidebar #chat-controls button {
+  --control-size: 32px;
+  --button-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+#chat-controls > .split-button > .ui-control {
+  border-radius: 6px;
+  border-inline-end-width: 1px;
+  border-inline-start-color: var(--control-border-color);
+}
+
+#chat-controls > .split-button > .ui-control:hover {
+  border-inline-start-color: var(--control-hover-border-color);
+}
+
+#chat-controls > .split-button > .ui-control:is([aria-pressed="true"], :focus) {
+  border-inline-start-color: var(--control-active-border-color);
+}
+
+#chat-message {
+  --menu-button-height: 32px;
+  --menu-height: 32px;
+  --menu-padding: 0px;
+  gap: 0;
+}
+
+.chat-sidebar .chat-input {
+  --chat-input-height: 80px;
+  flex-basis: calc(var(--chat-input-height) + 32px);
+}
+
+#chat-message > .menu-container {
+  order: 1;
+}
+
+#chat-message > .editor-container {
+  background: rgb(from var(--background-color, var(--color-cool-5)) r g b / var(--advanced-interface-chat-background-opacity, 1));
+  border: none;
+  border-radius: 6px 6px 0 0;
+}
+
+#chat-message > .editor-container .editor-content {
+  padding: 8px;
+}
+
+/* Bottom-row chat stacks the format bar above the message box, so their rounded corners swap. */
+#sidebar.advanced-interface #sidebar-content > .chat-sidebar.advanced-interface-bottom-row #chat-message > .editor-container {
+  border-radius: 0 0 6px 6px;
+}
+
+#sidebar.advanced-interface #sidebar-content > .chat-sidebar.advanced-interface-bottom-row #chat-message .editor-menu {
+  border-radius: 6px 6px 0 0;
+}
+
+#chat-message > .editor-container .editor-content > :first-child {
+  margin-top: 0;
+}
+
+#chat-message > .editor-container .editor-content > :last-child {
+  margin-bottom: 0;
+}
+
+#chat-message .editor-menu {
+  justify-content: flex-start;
+  padding: 0;
+  gap: 0;
+  border-radius: 0 0 6px 6px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+}
+
+#chat-message .editor-menu > li:has(> button.format) {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 96px;
+  margin-left: 4px;
+  margin-right: 0;
+}
+
+#chat-message .editor-menu .pm-dropdown,
+#chat-message .editor-menu .pm-dropdown > :is(span, i) {
+  font-size: max(16px, var(--font-size-16));
+}
+
+#chat-message .editor-menu button.format {
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  min-height: 24px;
+  margin: 4px 0;
+  opacity: 0;
+}
+
+#chat-message .editor-menu .advanced-interface-format-select {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+}
+
+#players-expand.fa-caret-up {
+  --fa: "\f106";
+}
+
+/* Flip only the glyph and its hover disc. Rotating the button swings its corners (and extended hit target) past the
+   panel edge mid-turn, briefly adding a scrollbar; a vertical flip never leaves the button's bounds. */
+#players #players-expand,
+#players.expanded #players-expand {
+  transform: none;
+  transition: none;
+}
+
+#players #players-expand::before,
+#players #players-expand > .advanced-interface-icon-disc {
+  transition: transform 250ms ease;
+}
+
+#players.expanded #players-expand::before,
+#players.expanded #players-expand > .advanced-interface-icon-disc {
+  transform: scaleY(-1);
+}
+
+body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:not(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-selected-color, #ff3f00);
+}
+
+#chat-message .editor-menu > li:has(> button):not(:has(> button.format)) {
+  flex: none;
+  width: 32px;
+  margin-inline: 0;
+}
+
+#chat-message .editor-menu > li:not(:has(> button.format)) > button {
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  padding-inline: 0;
+  height: 32px;
+  font-size: var(--font-size-16);
+}
+
+#sidebar-tabs button,
+#scene-controls .ui-control,
+.chat-sidebar #chat-controls button,
+.advanced-interface-chat-style :is(i.fa-solid, i.fa-regular, i.fa-duotone, button.icon),
+#calendar-hud .calendar-button button {
+  font-size: var(--font-size-16);
+}
+
+.advancedTime-sidebar .advanced-interface-utility-content,
+.advancedPlayers-sidebar .advanced-interface-utility-content,
+.advancedControls-sidebar .advanced-interface-utility-content,
+#advancedTime-popout .advanced-interface-utility-content,
+#advancedPlayers-popout .advanced-interface-utility-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 0;
+  overflow: auto;
+}
+
+.advancedControls-sidebar #scene-controls {
+  flex: none;
+  min-height: 0;
+  overflow: visible;
+  height: auto !important;
+  width: 104px;
+  min-width: 104px;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+:is(.advancedPlayers-sidebar, #advancedPlayers-popout) .advanced-interface-utility-content {
+  overflow-x: hidden;
+}
+
+.advancedControls-sidebar .advanced-interface-utility-content,
+.advancedControls-sidebar.sidebar-popout > .window-content {
+  flex: none;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.advancedControls-sidebar.sidebar-popout {
+  height: auto !important;
+  max-height: none;
+}
+
+.advancedControls-sidebar #scene-controls > menu {
+  height: auto;
+}
+
+.advancedControls-sidebar #scene-controls #scene-controls-tools {
+  flex: none;
+  min-width: 0;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-content: flex-start;
+  display: grid;
+  grid-template-columns: 32px 32px;
+  grid-auto-rows: 32px;
+  gap: 4px;
+  width: 68px;
+  max-height: none;
+}
+
+.advanced-interface-time-controls,
+.advanced-interface-calendar > header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.advanced-interface-time-controls {
+  overflow-x: clip;
+  height: 32px;
+  min-height: 32px;
+  background: var(--advanced-interface-toolbar-background);
+  border-radius: 6px;
+}
+
+.advanced-interface-time-controls button,
+.advanced-interface-calendar button {
+  --control-size: 32px;
+  --button-size: 32px;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  font-size: var(--font-size-16);
+}
+
+/* Inset like directory search inputs: 24px tall with 4px above and below. */
+:is(.advanced-interface-time-controls select, #chat-message .advanced-interface-format-select) {
+  width: 96px;
+  height: 24px;
+  padding-left: 4px;
+  padding-right: 4px;
+  margin: 4px 0;
+  flex: none;
+  color: var(--advanced-interface-text-color);
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: 400;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(.advanced-interface-time-controls select, #chat-message .advanced-interface-format-select) {
+  outline: none;
+  box-shadow: none;
+  cursor: var(--cursor-pointer);
+}
+
+/* The increment select highlights like the panel's text inputs. */
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls select:not(:disabled):is(:hover, :focus, .advanced-interface-dropdown-open),
+#chat-message .editor-menu li:has(> button.format:is(:hover, :focus, [aria-expanded="true"])) > .advanced-interface-format-select {
+  border-color: var(--advanced-interface-hover-color);
+  background-color: var(--advanced-interface-input-highlight);
+  outline: none;
+  box-shadow: none;
+}
+
+/* Dropdown menus (Time increment, chat Format, canvas HUD) share a tinted panel, standard 16px text, and one
+   highlighted row shared by mouse and keyboard. */
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown, .advanced-interface-placeable-hud .palette) {
+  --dropdown-background: var(--advanced-interface-dropdown-background);
+  --dropdown-border: var(--advanced-interface-dropdown-border);
+  --color-control-hover: var(--advanced-interface-dropdown-hover);
+  --color-form-label-hover: var(--advanced-interface-text-color);
+  --button-text-color: var(--advanced-interface-text-color);
+  color: var(--advanced-interface-text-color);
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: 400;
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) {
+  position: fixed;
+  z-index: var(--z-index-tooltip);
+}
+
+.advanced-interface-dropdown {
+  top: 0;
+  left: 0;
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) ul,
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--dropdown-background);
+  border: 1px solid var(--dropdown-border);
+  border-radius: 3px;
+  color: var(--advanced-interface-text-color);
+  font-size: var(--font-size-16);
+  font-weight: 400;
+  line-height: 24px;
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) ul {
+  box-shadow: rgba(0, 0, 0, 0.45) 0 3px 6px;
+}
+
+.advanced-interface-dropdown > ul {
+  display: block;
+  max-height: 400px;
+  overflow: hidden auto;
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) li,
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette-list-entry {
+  --advanced-interface-disc-left: 6px !important;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 32px;
+  padding: 0 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: var(--cursor-pointer);
+  outline: none;
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) li > :is(span, i) {
+  color: var(--advanced-interface-text-color);
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) li > i {
+  font-size: var(--font-size-14);
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) li.divider {
+  padding: 0;
+  margin-block: 2px;
+  border-bottom: 1px solid var(--dropdown-border);
+  cursor: default;
+}
+
+/* Submenus open from the highlighted path only, so mouse and keyboard never show two at once. */
+#prosemirror-dropdown.advanced-interface-format-dropdown li:hover {
+  background: none;
+}
+
+#prosemirror-dropdown.advanced-interface-format-dropdown li:hover > ul {
+  display: none;
+}
+
+#prosemirror-dropdown.advanced-interface-format-dropdown li.advanced-interface-open > ul {
+  display: block;
+}
+
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) li:is(.focused, .advanced-interface-open) {
+  background: var(--color-control-hover);
+}
+
+.advanced-interface-calendar > header strong {
+  flex: 1;
+  min-width: 0;
+  font-weight: normal;
+}
+
+.advanced-interface-sundial {
+  flex: none;
+  box-sizing: border-box;
+  width: 96px;
+  height: 32px;
+  min-width: 0;
+  padding: 4px;
+}
+
+.advanced-interface-time-controls button:disabled {
+  opacity: 0.35;
+}
+
+.advanced-interface-calendar {
+  display: flex;
+  flex-direction: column;
+  width: 352px;
+  align-self: flex-start;
+  gap: 8px;
+  background: var(--advanced-interface-card-background, var(--advanced-interface-card-color));
+  border-radius: 6px;
+  min-width: 0;
+  overflow-x: clip;
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-calendar :is(strong, abbr, .advanced-interface-calendar-day) {
+  font-family: inherit;
+  font-size: var(--font-size-16);
+  font-weight: normal;
+  color: var(--color-text-primary);
+}
+
+.advanced-interface-calendar > header {
+  position: relative;
+  flex: 0 0 32px;
+  height: 32px;
+}
+
+.advanced-interface-calendar > header::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--color-border, var(--color-cool-4));
+  pointer-events: none;
+}
+
+.advanced-interface-calendar-icon {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-calendar:is(:hover, :focus-within) > header > .advanced-interface-calendar-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-calendar:hover > header::after {
+  inset-inline: 1px;
+}
+
+.advanced-interface-calendar[hidden] {
+  display: none;
+}
+
+.advanced-interface-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--calendar-weekdays), 48px);
+  justify-content: center;
+  grid-template-rows: 48px;
+  grid-auto-rows: 48px;
+  padding-inline: 8px;
+  gap: 0;
+  text-align: center;
+  justify-items: center;
+  align-items: center;
+}
+
+.advanced-interface-calendar-grid > abbr {
+  text-decoration: none;
+  border-bottom: none;
+  font-weight: normal;
+}
+
+.advanced-interface-calendar .advanced-interface-calendar-day {
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.advanced-interface-sundial #calendar-hud {
+  position: static;
+  transform: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.advanced-interface-sundial #calendar-hud > .calendar-buttons,
+.advanced-interface-sundial #calendar-hud .calendar-date,
+.advanced-interface-sundial #calendar-hud .calendar-time {
+  display: none;
+}
+
+.advanced-interface-sundial #calendar-hud .calendar-core {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100%;
+  border: none;
+  background: transparent;
+  gap: 8px;
+}
+
+.advanced-interface-sundial #calendar-hud .calendar-widget {
+  grid-column: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 6px;
+  margin: 0;
+}
+
+.advanced-interface-sundial #calendar-hud .calendar-stars {
+  left: calc(50% - 50px);
+  top: calc(50% - 50px);
+}
+
+.advanced-interface-sundial #calendar-hud .calendar-sun {
+  --advanced-interface-sun-x: calc(50% + (50% - 5px) * cos(var(--_sun-progress) * pi));
+  --advanced-interface-sun-y: calc(100% - 5px - (100% - 10px) * sin(var(--_sun-progress) * pi));
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  rotate: none;
+}
+
+.advanced-interface-sundial #calendar-hud .calendar-sun::before,
+.advanced-interface-sundial #calendar-hud .calendar-sun::after {
+  inset: auto;
+  left: var(--advanced-interface-sun-x);
+  top: var(--advanced-interface-sun-y);
+  translate: -50% -50%;
+}
+
+.advanced-interface-sundial #calendar-hud .calendar-sun::before {
+  inline-size: 100px;
+  block-size: 100px;
+  rotate: none;
+  transition: opacity var(--calendar-animation), left var(--calendar-animation), top var(--calendar-animation);
+}
+
+.advanced-interface-sundial #calendar-hud .calendar-sun::after {
+  transition: left var(--calendar-animation), top var(--calendar-animation);
+}
+
+.advanced-interface-set-date-time [data-application-part="content"] > .form-fields {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.advanced-interface-set-date-time :is(.form-group, .form-fields, input, select) {
+  min-width: 0;
+}
+
+.advanced-interface-set-date-time [data-application-part="content"] > .form-fields > .form-group {
+  grid-column: span 1;
+}
+
+.advanced-interface-set-date-time [data-application-part="content"] > .form-fields > .form-group:has([name="month"]) {
+  grid-column: span 2;
+}
+
+/* Players panel, A/V controls, and floating cards. */
+.advanced-interface-utility-content #players {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  row-gap: 4px;
+}
+
+.advanced-interface-utility-content #players :is(#players-active, #players-inactive)[hidden] {
+  display: none;
+}
+
+.advanced-interface-utility-content #players #players-inactive:not([hidden]) {
+  visibility: visible;
+}
+
+.advanced-interface-utility-content #players #players-inactive {
+  max-height: none;
+  overflow: visible;
+  transition: none;
+}
+
+.advanced-interface-utility-content #players .advanced-interface-player-heading {
+  display: flex;
+  align-items: center;
+  flex: 0 0 32px;
+  height: 32px;
+  gap: 0;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--advanced-interface-toolbar-background);
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-player-heading-label {
+  flex: 1;
+  min-width: 0;
+  padding-inline-start: 8px;
+}
+
+.advanced-interface-player-shutter {
+  margin-inline-start: auto;
+}
+
+.advanced-interface-player-shutter::before,
+.advanced-interface-player-shutter > .advanced-interface-icon-disc {
+  transition: transform 250ms ease;
+}
+
+.advanced-interface-player-shutter[aria-expanded="false"]::before,
+.advanced-interface-player-shutter[aria-expanded="false"] > .advanced-interface-icon-disc {
+  transform: scaleY(-1);
+}
+
+.advanced-interface-utility-content #players :is(#players-active, #players-inactive, .players-list) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  row-gap: 4px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.advanced-interface-utility-content #players #performance-stats {
+  overflow-x: clip;
+  flex: 0 0 32px;
+  height: 32px;
+  min-height: 32px;
+  align-items: center;
+  background: var(--advanced-interface-toolbar-background);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  flex-wrap: nowrap;
+  padding: 0;
+  gap: 0;
+}
+
+.advanced-interface-utility-content #players #performance-stats button,
+.advanced-interface-av-controls > button {
+  --button-size: 32px;
+  --control-size: 32px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: var(--font-size-16);
+}
+
+/* The camera dock is replaced by the Players panel's video cards and A/V bar. It stays rendered but invisible and
+   out of the layout, because its video elements play everyone's audio. */
+#camera-views {
+  position: fixed !important;
+  inset: 0 auto auto 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip-path: inset(50%);
+}
+
+/* A/V controls remain right-aligned in their own control bar. */
+.advanced-interface-av-controls {
+  position: static;
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 32px;
+  margin: 0 0 0 auto;
+  padding: 0;
+  gap: 0;
+  background: transparent;
+  opacity: 1;
+  visibility: visible;
+}
+
+.advanced-interface-utility-content #players #performance-stats > :is(#latency, #fps) {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-inline-end: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.advanced-interface-utility-content #players #performance-stats > #latency {
+  margin-inline-start: 8px;
+}
+
+.advanced-interface-utility-content #players #performance-stats :is(#latency, #fps) > label {
+  color: var(--advanced-interface-bar-color);
+}
+
+.advanced-interface-utility-content #players .advanced-interface-player-heading > button {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+:is(#sidebar-content, .sidebar-popout) .advanced-interface-av-controls > button {
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+  margin: 0;
+  background: transparent !important;
+}
+
+:is(#sidebar-content, .sidebar-popout) .advanced-interface-av-controls > button:not(:disabled):is(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-av-controls > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+
+/* Player cards: 64px avatar, Options, player color, name, and A/V controls. */
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player {
+  --advanced-interface-player-thumbnail: 64px;
+  grid-template-columns: var(--advanced-interface-player-thumbnail) 32px 32px minmax(0, 1fr) 64px var(--advanced-interface-player-extra-columns, );
+  grid-template-rows: 32px 32px;
+  flex: 0 0 64px;
+  height: 64px;
+  min-height: 64px;
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  margin-block: 0;
+  overflow: clip;
+  border-radius: 6px;
+  background: var(--advanced-interface-card-background);
+  font-size: var(--font-size-16);
+  line-height: 32px;
+  outline: none;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-player-avatar {
+  grid-row: 1 / 3;
+  grid-column: 1;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  border: none;
+  mask-image: var(--advanced-interface-thumbnail-fade);
+  justify-self: start;
+  align-self: start;
+  box-sizing: border-box;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-card-menu-button {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .player-name {
+  grid-row: 1;
+  grid-column: 4;
+  min-width: 0;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player:not(.active) > .advanced-interface-player-avatar {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+/* Microphone and camera icons at the right of the card header; active states are orange, off states keep the icon colour with the slash glyph. */
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-player-av {
+  grid-row: 1;
+  grid-column: 5;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-self: stretch;
+  gap: 0;
+}
+
+:is(:is(#sidebar-content, .sidebar-popout) .advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-player-av > button {
+  --button-size: 32px;
+  --control-size: 32px;
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+  position: relative;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-16);
+  line-height: 32px;
+}
+
+:is(:is(#sidebar-content, .sidebar-popout) .advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-player-av > button:not(.advanced-interface-player-av-off, :hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-selected-color);
+}
+
+:is(:is(#sidebar-content, .sidebar-popout) .advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-player-av > button:not(:disabled):is(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-hover-color);
+}
+
+:is(:is(#sidebar-content, .sidebar-popout) .advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-player-av > button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+/* Video keeps the received stream's aspect ratio beneath the header. */
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player.advanced-interface-player-has-video {
+  --advanced-interface-player-thumbnail: 0px;
+  grid-template-rows: 32px auto;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player.advanced-interface-player-has-video > .advanced-interface-player-avatar {
+  display: none;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .advanced-interface-player-video {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  align-self: stretch;
+  justify-self: stretch;
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--advanced-interface-video-ratio, 4 / 3);
+  object-fit: contain;
+  margin: 0;
+  background: black;
+}
+
+/* Away players show the idle "zzz" in place of their color dot, tinted with their player color. */
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player > .player-name::after {
+  position: absolute;
+  top: 0;
+  left: calc(var(--advanced-interface-player-thumbnail) + 32px);
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  line-height: 32px;
+  text-align: center;
+  color: var(--player-color);
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player.idle::before {
+  visibility: hidden;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player::before {
+  grid-row: 1;
+  grid-column: 3;
+  justify-self: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+}
+
+/* Card outline and header line are drawn on an overlay so they sit above the (masked) avatar. */
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border: 1px solid var(--advanced-interface-card-border);
+  border-radius: inherit;
+  background: linear-gradient(var(--advanced-interface-divider-color), var(--advanced-interface-divider-color)) 0 31px / 100% 1px no-repeat;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player:not(.advanced-interface-player-has-video)::after {
+  background: none;
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player:is(:hover, :focus-within)::after {
+  border-color: var(--advanced-interface-hover-color);
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player:is(.context, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within)::after {
+  border-color: var(--advanced-interface-selected-color);
+}
+
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player.advanced-interface-card-menu-open::before {
+  visibility: hidden;
+}
+
+/* Players dragged out of the panel float as their own card; the panel hides their row until the card is closed. */
+.advanced-interface-utility-content #players .player.advanced-interface-player-floating {
+  display: none;
+}
+
+.advanced-interface-player-window {
+  --advanced-interface-card-background: var(--dnd5e-chat-background, var(--advanced-interface-chat-card-background, var(--chat-message-background, var(--advanced-interface-card-color))));
+  --advanced-interface-card-border: var(--advanced-interface-card-border-color);
+  --control-icon-color: var(--advanced-interface-text-color);
+  --player-name-color: var(--color-text-primary);
+  --player-name-idle-color: var(--advanced-interface-player-idle-color);
+  --player-name-self-color: var(--advanced-interface-player-self-color);
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+  color: var(--color-text-primary);
+  pointer-events: all;
+  user-select: none;
+}
+
+.advanced-interface-player-window.advanced-interface-player-drag-ghost {
+  position: fixed;
+  z-index: var(--z-index-tooltip, 10000);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.advanced-interface-player-window .player {
+  flex: 0 0 auto;
+  color: var(--player-name-color);
+  cursor: grab;
+}
+
+.advanced-interface-player-window.advanced-interface-player-dragging .player,
+.advanced-interface-player-window.advanced-interface-player-drag-ghost .player {
+  cursor: grabbing;
+}
+
+.advanced-interface-utility-content #players .player {
+  cursor: grab;
+}
+
+.advanced-interface-player-window .player.idle .player-name {
+  color: var(--player-name-idle-color);
+}
+
+.advanced-interface-player-window .player.self .player-name {
+  color: var(--player-name-self-color);
+}
+
+.advanced-interface-player-window .player.idle .player-name::after {
+  content: "\f880";
+  font-family: var(--font-awesome);
+}
+
+.advanced-interface-player-window .player::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  background: var(--player-color);
+  border-radius: 100%;
+}
+
+/* Floating cards add a Close button after the microphone and camera icons. */
+.advanced-interface-player-window:not(.advanced-interface-player-drag-ghost) .player {
+  --advanced-interface-player-extra-columns: 32px;
+}
+
+.advanced-interface-player-window .player > .advanced-interface-player-window-controls {
+  grid-row: 1;
+  grid-column: 6;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-self: stretch;
+  gap: 0;
+}
+
+.advanced-interface-player-window.advanced-interface-player-drag-ghost .player > .advanced-interface-player-window-controls {
+  display: none;
+}
+
+.advanced-interface-player-window .player > :is(.advanced-interface-player-av, .advanced-interface-player-window-controls) > button {
+  --button-size: 32px;
+  --control-size: 32px;
+  position: relative;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  font-size: var(--font-size-16);
+  line-height: 32px;
+  color: var(--advanced-interface-button-icon-color, var(--control-icon-color)) !important;
+  cursor: pointer;
+}
+
+.advanced-interface-player-window .player > .advanced-interface-player-window-controls > button {
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+}
+
+.advanced-interface-player-window .player > .advanced-interface-player-window-controls > button:is(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-hover-color);
+}
+
+#bastion-turn {
+  display: none;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls > button.ui-control.plain {
+  padding: 0;
+  border-radius: 6px;
+  background: transparent !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls > button.advanced-interface-shutter::before,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls > button.advanced-interface-shutter > .advanced-interface-icon-disc {
+  transition: transform 250ms ease;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls > button.advanced-interface-shutter[aria-expanded="true"]::before,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls > button.advanced-interface-shutter[aria-expanded="true"] > .advanced-interface-icon-disc {
+  transform: scaleY(-1);
+}
+
+/* Cross-component state rules follow component bases; hover/focus overrides selection. */
+:is(#sidebar-content > .sidebar-tab:not(:where(.compendium-directory)):not(.advancedControls-sidebar), .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout:not(.advancedControls-sidebar) > .window-content, .chat-popout > .window-content) :is(button, [role="button"], a.button, .ui-control, .create-button),
+.advanced-interface-matched-popout > .window-header .header-control {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-shadow: none !important;
+}
+
+:is(#sidebar-content > .sidebar-tab:not(:where(.compendium-directory)):not(.advancedControls-sidebar), .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout:not(.advancedControls-sidebar) > .window-content, .chat-popout > .window-content) :is(button, [role="button"], a.button, .ui-control, .create-button)::after {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--advanced-interface-button-icon-color, inherit) !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, .chat-popout) :is(button, [role="button"], a.button, .ui-control, .create-button):not([data-tab], :disabled, [aria-disabled="true"]):is(:hover, :focus-visible) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(button, [role="button"], a.button, .ui-control, .create-button):not([data-tab], :disabled, [aria-disabled="true"], :hover, :focus-visible):is(.active, [aria-pressed="true"], [aria-expanded="true"], [aria-current="date"]) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-selected-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(button, [role="button"], a.button, .ui-control, .create-button):not([data-tab]),
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) :is(button, [role="button"], a.button, .ui-control, .create-button):not([data-tab]) > :not(.advanced-interface-scene-user, .advanced-interface-popout-leader) {
+  color: var(--advanced-interface-button-icon-color, inherit) !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-calendar-grid > button.advanced-interface-calendar-day {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--color-text-primary) !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-calendar-grid > button.advanced-interface-calendar-day:not(:disabled):is(:hover, :focus-visible) {
+  background: var(--advanced-interface-hover-color) !important;
+  color: var(--advanced-interface-on-highlight-color) !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-calendar-grid > button.advanced-interface-calendar-day:is([aria-current="date"], .active, [aria-pressed="true"], :active):not(:disabled, :hover, :focus-visible) {
+  background: var(--advanced-interface-selected-color) !important;
+  color: var(--advanced-interface-on-highlight-color) !important;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) :is(.chat-scroll, .directory-list, .directory-wrapper, .combat-tracker, .placeable-directory, .advanced-interface-utility-content),
+.chat-sidebar .editor-content,
+.settings-sidebar.active,
+.settings-sidebar.sidebar-popout > .window-content {
+  padding-inline-end: var(--advanced-interface-scroll-gap, 0px);
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) .advanced-interface-scroll-region,
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-scroll-region {
+  --advanced-interface-scroll-gap: 0px;
+  scrollbar-gutter: auto;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) .advanced-interface-scroll-region.advanced-interface-scroll-overflow,
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-scroll-region.advanced-interface-scroll-overflow {
+  --advanced-interface-scroll-gap: 4px;
+}
+
+.sidebar-tab:not(:where(.compendium-directory)) .scrollable {
+  padding-inline-end: var(--advanced-interface-scroll-gap, 0px);
+}
+
+.advanced-interface-chat-style.settings-sidebar :is(section, .system-badge, .info .subtitle) {
+  row-gap: 8px;
+  margin-block: 0;
+}
+
+.advanced-interface-utility-content #players :is(.players-list, .players-footer) {
+  row-gap: 4px;
+  margin-block: 0;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) :is(input:not([type="range"], [type="checkbox"], [type="radio"]), textarea, .editor-content) {
+  outline: none;
+  color: var(--input-text-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) :is(input:not([type="range"], [type="checkbox"], [type="radio"]), textarea, .editor-content):is(:hover, :focus-within) {
+  border-color: var(--advanced-interface-hover-color);
+  background-color: var(--advanced-interface-input-highlight);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) :is(input, textarea)::placeholder {
+  color: var(--input-placeholder-color);
+}
+
+/* The chat input keeps its background; one highlight line wraps the message box and its format bar. */
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) #chat-message .editor-content:is(:hover, :focus-within) {
+  background-color: transparent;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) #chat-message::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px transparent;
+  pointer-events: none;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) #chat-message:is(:hover, :focus-within)::after {
+  box-shadow: inset 0 0 0 1px var(--advanced-interface-hover-color);
+}
+
+/* The chat input's "Enter message" placeholder uses the shared label font, muted like other placeholders. */
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) #chat-message .editor-container::after {
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: 400;
+  font-style: normal;
+  color: var(--placeholder-color);
+}
+
+#sidebar.advanced-interface #sidebar-content > .advancedControls-sidebar.active {
+  display: flex;
+  height: max-content;
+  min-height: 0;
+  overflow: auto;
+}
+
+.advancedControls-sidebar #scene-controls #scene-controls-layers {
+  gap: 4px;
+}
+
+.advancedControls-sidebar #scene-controls :is(li, button) {
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+}
+
+.advancedControls-sidebar #scene-controls button {
+  --control-size: 32px;
+  --button-size: 32px;
+  padding: 0;
+}
+
+.advancedControls-sidebar #scene-controls #scene-controls-tools > li {
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+#scene-controls-tools .advanced-interface-type-tool .notification-pip {
+  display: none;
+}
+
+#scene-controls-tools:not(.advanced-interface-types-open) .advanced-interface-type-tool {
+  display: none;
+}
+
+#scene-controls li:has(> button:is([data-control="advancedInterfaceIdle"], [data-tool="advancedInterfaceIdle"])) {
+  display: none;
+}
+
+#scene-controls button[data-tool="ellipse"]::before {
+  transform: scale(1.2, 0.7);
+}
+
+#sidebar.advanced-interface #sidebar-content > .advancedControls-sidebar.active,
+.advancedControls-sidebar .advanced-interface-utility-content {
+  overflow: clip;
+}
+
+body #sidebar.advanced-interface > #sidebar-tabs [data-tab]::before {
+  color: var(--control-icon-color) !important;
+}
+
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style :is(.global-control, .placeable-entry, .combatant) {
+  padding-block: 0;
+  border-width: 0;
+  height: calc-size(auto, round(nearest, size, 32px));
+}
+
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style :is(.sound > header, .sound > header .sound-control) {
+  height: 32px;
+  line-height: 32px;
+}
+
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style :is(.directory-item.entry, .placeable-entry > .description) {
+  column-gap: 0;
+}
+
+.advancedControls-sidebar .advanced-interface-utility-content {
+  padding-bottom: 0 !important;
+}
+
+.advanced-interface-chat-style :is(.directory-item.entry, .sound, .playlist, .combatant, .placeable-entry, .group-header, .folder-header),
+.advanced-interface-chat-style.settings-sidebar :is(section:not(.window-content), .sidebar-info .links, .system-badge),
+.advanced-interface-calendar {
+  row-gap: 0;
+  padding-block: 0;
+}
+
+.advanced-interface-chat-style :is(.sound > header, .playlist-header, .folder-header, .group-header, .placeable-entry > .description, .combatant),
+.advanced-interface-calendar > header {
+  min-height: 32px;
+  height: 32px;
+  padding-block: 0;
+  line-height: 32px;
+}
+
+.advanced-interface-chat-style :is(.sound > header > i, .folder-header > i, .group-header > i) {
+  flex-basis: 32px;
+  width: 32px;
+}
+
+.advanced-interface-chat-style :is(.directory-item.entry, .sound, .playlist, .combatant, .placeable-entry) {
+  border-width: 0;
+  box-shadow: inset 0 0 0 1px var(--advanced-interface-card-border);
+}
+
+/* Artwork sits above header shading but below card content and outlines. */
+:is(.directory-item.entry, .combatant, .placeable-entry, .player):has(> :is(img.thumbnail, img.token-image, img.compendium-banner, img.advanced-interface-player-avatar)) {
+  isolation: isolate;
+}
+
+:is(.directory-item.entry, .combatant, .placeable-entry, .player) > :is(img.thumbnail, img.token-image, img.compendium-banner, img.advanced-interface-player-avatar) {
+  z-index: -2;
+}
+
+:is(.combatant, .placeable-entry, .player) > :is(img.token-image, img.thumbnail, img.advanced-interface-player-avatar) {
+  position: relative;
+}
+
+.advanced-interface-chat-style :is(.advanced-interface-card, .directory-item.entry, .combatant, .placeable-entry, .global-control, .advanced-interface-scene-levels > ul > li):is(:hover, :focus-within):not(:has(.advanced-interface-card:is(:hover, :focus-within))),
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card:is(:hover, :focus-within),
+.advanced-interface-chat-style .directory-item.folder > .folder-header:is(:hover, :focus-within),
+.advanced-interface-calendar:hover {
+  outline: 1px solid var(--advanced-interface-hover-color);
+  outline-offset: -1px;
+}
+
+.advanced-interface-chat-style :is(.advanced-interface-card, .directory-item.entry, .combatant, .placeable-entry, .global-control, .advanced-interface-scene-levels > ul > li):is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within):not(:has(.advanced-interface-card:active)),
+.advanced-interface-chat-style .directory-item.folder:is(.context, .active) > .folder-header:not(:hover, :focus-within),
+.advanced-interface-chat-style .directory-item.folder > .folder-header:is(.context, .active, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within),
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card:is(.context, .advanced-interface-card-menu-open, :active):not(:hover, :focus-within) {
+  outline: 1px solid var(--advanced-interface-selected-color);
+  outline-offset: -1px;
+}
+
+.advanced-interface-chat-style.journal-sidebar {
+  --sidebar-item-height: 32px;
+}
+
+.advanced-interface-chat-style .directory-item.entry:is(.document, .compendium) {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
+}
+
+.advanced-interface-chat-style.journal-sidebar .directory-item.entry.journalentry {
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+}
+
+.advanced-interface-chat-style :is(.sound-playback, .global-volume li, .sound-controls, .placeable-entry > .description) {
+  column-gap: 0;
+  min-height: 32px;
+}
+
+.advanced-interface-chat-style.settings-sidebar section.advanced-interface-settings-actions {
+  height: auto;
+  min-height: 64px;
+  grid-auto-rows: auto;
+  row-gap: 0;
+}
+
+.advanced-interface-chat-style.settings-sidebar .system-badge img {
+  max-height: 32px;
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.advanced-interface-chat-style.settings-sidebar .system-badge {
+  gap: 8px;
+}
+
+.advanced-interface-chat-style :is(header label, header strong, .playlist-name, .entry-name:not(.compendium-name), .group-header > .label, .description > .label, .combatant-name),
+.advanced-interface-calendar > header,
+#sidebar.advanced-interface #sidebar-tabs .advanced-interface-tab-label {
+  color: var(--color-text-primary) !important;
+  text-shadow: none !important;
+}
+
+.advanced-interface-chat-style.settings-sidebar :is(h4.divider, .title) {
+  color: var(--advanced-interface-settings-color) !important;
+}
+
+.advanced-interface-matched-popout > .window-header:is(:hover, :focus-within, :active) .window-title {
+  --advanced-interface-button-icon-color: var(--control-icon-color);
+  color: var(--control-icon-color) !important;
+}
+
+.advanced-interface-card {
+  --advanced-interface-card-header-darkness: 0%;
+  position: relative;
+  isolation: isolate;
+}
+
+.advanced-interface-card:is(:hover, .advanced-interface-card-menu-open) {
+  --advanced-interface-card-header-darkness: 40%;
+}
+
+.advanced-interface-settings-modal {
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+  max-height: calc(100vh - 32px);
+}
+
+.advanced-interface-settings-modal::backdrop {
+  background: rgb(11 10 19 / 75%);
+  backdrop-filter: grayscale(1);
+}
+
+.advanced-interface-settings-modal > .settings-sidebar {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  max-height: calc(100vh - 32px);
+}
+
+.advanced-interface-settings-modal .window-header {
+  cursor: grab;
+}
+
+#advanced-interface-settings-menu {
+  overflow: hidden;
+}
+
+/* Plain document cards use our parchment fill, not the native dark sidebar surface.
+   Use Foundry's light-theme primary text; artwork-backed scenes/packs and folders keep native palettes. */
+@scope (body.theme-light, .themed.theme-light) to (.themed.theme-dark) {
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .directory-item.entry.document.advanced-interface-card:not(.scene),
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .directory-item.entry.document.advanced-interface-card:not(.scene) *,
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .directory-item.entry.document.advanced-interface-card:not(.scene) *::before,
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .directory-item.entry.document.advanced-interface-card:not(.scene) *::after {
+  color: var(--color-dark-2) !important;
+}
+}
+
+/* Options share the sampled native header palette, including artwork-specific light text. */
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .placeable-entry.advanced-interface-card .advanced-interface-placeable-row-icon,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .placeable-entry.advanced-interface-card .advanced-interface-placeable-row-icon::before {
+  color: var(--advanced-interface-card-header-color, inherit) !important;
+}
+
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .combatant.advanced-interface-card .combatant-control.inline-control,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .combatant.advanced-interface-card .combatant-control.inline-control::before,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .combatant.advanced-interface-card .combatant-control.inline-control::after,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .combatant.advanced-interface-card .token-initiative > .combatant-control,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .combatant.advanced-interface-card .token-initiative > .combatant-control::before,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .placeable-entry.advanced-interface-card .advanced-interface-placeable-toggle,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .placeable-entry.advanced-interface-card .advanced-interface-placeable-toggle::before,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .placeable-entry.advanced-interface-card .advanced-interface-placeable-toggle::after {
+  color: var(--advanced-interface-card-header-color, inherit) !important;
+}
+
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window) .player.advanced-interface-card button.ui-control,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window) .player.advanced-interface-card button.ui-control::before,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window) .player.advanced-interface-card button.ui-control::after {
+  color: var(--advanced-interface-card-header-color, inherit) !important;
+}
+
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) .advanced-interface-card :is(
+  .advanced-interface-card-menu-button, .advanced-interface-card-actions, .advanced-interface-card-actions *
+),
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) .advanced-interface-card :is(
+  .advanced-interface-card-menu-button, .advanced-interface-card-actions, .advanced-interface-card-actions *
+)::before,
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) .advanced-interface-card :is(
+  .advanced-interface-card-menu-button, .advanced-interface-card-actions, .advanced-interface-card-actions *
+)::after {
+  color: var(--advanced-interface-card-header-color, inherit) !important;
+}
+
+.advanced-interface-chat-style.settings-sidebar > .window-content {
+  row-gap: 4px;
+}
+
+.advanced-interface-chat-style :is(.directory-item.entry, .combatant, .placeable-entry) {
+  padding-inline: 0;
+}
+
+:is(.advanced-interface-chat-style.playlists-sidebar, .webrtc-volume-slider) input[type="range"] {
+  --advanced-interface-slider-thumb-color: var(--range-thumb-background-color);
+  accent-color: var(--advanced-interface-slider-thumb-color);
+}
+
+:is(.advanced-interface-chat-style.playlists-sidebar, .webrtc-volume-slider) input[type="range"]::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--advanced-interface-slider-thumb-color);
+  border-color: var(--range-thumb-border-color);
+  clip-path: none;
+}
+
+:is(.advanced-interface-chat-style.playlists-sidebar, .webrtc-volume-slider) input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--advanced-interface-slider-thumb-color);
+  border-color: var(--range-thumb-border-color);
+}
+
+:is(.advanced-interface-chat-style.playlists-sidebar, .webrtc-volume-slider) input[type="range"]:is(:hover, :focus-visible) {
+  --advanced-interface-slider-thumb-color: var(--advanced-interface-hover-color);
+}
+
+:is(.advanced-interface-chat-style.playlists-sidebar, .webrtc-volume-slider) input[type="range"]:active:not(:hover, :focus-visible) {
+  --advanced-interface-slider-thumb-color: var(--advanced-interface-selected-color);
+}
+
+:is(.advanced-interface-chat-style.playlists-sidebar, .webrtc-volume-slider) input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--range-track-color);
+  border-color: var(--range-track-border-color);
+}
+
+:is(.advanced-interface-chat-style.playlists-sidebar, .webrtc-volume-slider) input[type="range"]::-moz-range-track {
+  background: var(--range-track-color);
+  border-color: var(--range-track-border-color);
+}
+
+:where(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications),
+:where(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) * {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications)::-webkit-scrollbar,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout)::-webkit-scrollbar-track,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout)::-webkit-scrollbar-corner,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-track,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-corner {
+  background: var(--color-scrollbar-track);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications)::-webkit-scrollbar-thumb,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar);
+  border: none;
+  border-radius: 6px;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications)::-webkit-scrollbar-thumb:hover,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-thumb:hover {
+  background: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications)::-webkit-scrollbar-thumb:active,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-thumb:active {
+  background: var(--advanced-interface-selected-color);
+}
+
+[data-advanced-interface-scrollbar="hover"]::-webkit-scrollbar-thumb {
+  background: var(--advanced-interface-hover-color) !important;
+}
+
+[data-advanced-interface-scrollbar="active"]::-webkit-scrollbar-thumb {
+  background: var(--advanced-interface-selected-color) !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout)::-webkit-scrollbar-button,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-button {
+  display: none;
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-scrollbar-track);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications)::-webkit-scrollbar-button:hover,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-button:hover {
+  background-color: var(--advanced-interface-hover-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications)::-webkit-scrollbar-button:active,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-button:active {
+  background-color: var(--advanced-interface-selected-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout)::-webkit-scrollbar-button:vertical:decrement:start,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-button:vertical:decrement:start {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1 5 4 2 7 5' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout)::-webkit-scrollbar-button:vertical:increment:end,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-button:vertical:increment:end {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='m1 3 3 3 3-3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout)::-webkit-scrollbar-button:horizontal:decrement:start,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-button:horizontal:decrement:start {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M5 1 2 4 5 7' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout)::-webkit-scrollbar-button:horizontal:increment:end,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout, #scene-controls, #calendar-hud, #hotbar, #players, #chat-message, #chat-notifications) ::-webkit-scrollbar-button:horizontal:increment:end {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='m3 1 3 3-3 3' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+/* Card menus: the menu button opens the right-click actions inline across the card's top row. */
+body .advanced-interface-card > .advanced-interface-card-menu-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  flex: 0 0 32px;
+  align-self: flex-start;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-16);
+}
+
+/* No transition: core's 0.5s "transition: all" on folder create buttons would delay hiding them. */
+body .advanced-interface-card-menu-hidden,
+body .advanced-interface-card-menu-hidden * {
+  visibility: hidden !important;
+  transition: none !important;
+}
+
+body #context-menu.advanced-interface-card-actions {
+  --control-icon-color: var(--advanced-interface-text-color);
+  color: var(--control-icon-color) !important;
+  position: absolute;
+  top: 0;
+  left: var(--advanced-interface-card-actions-start, 32px);
+  right: 0;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  height: auto;
+  min-height: 32px;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+  z-index: 3;
+}
+
+body #context-menu.advanced-interface-card-actions :is(menu, ol) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+}
+
+body #context-menu.advanced-interface-card-actions .context-group {
+  display: contents;
+}
+
+body #context-menu.advanced-interface-card-actions .context-item {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--control-icon-color, var(--advanced-interface-text-color)) !important;
+}
+
+body #context-menu.advanced-interface-card-actions .context-item > span:not(.advanced-interface-icon-disc) {
+  display: none;
+}
+
+body #context-menu.advanced-interface-card-actions .context-item > i {
+  margin: 0;
+  font-size: var(--font-size-16);
+  color: inherit !important;
+}
+
+/* Combatant cards: name, then actions, resource and initiative; effects wrap in 32px rows below. */
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style .combat-tracker > .combatant-group {
+  height: auto;
+}
+
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style .combat-tracker .combatant[data-combatant-id] {
+  --advanced-interface-card-header-height: 100%;
+  display: grid;
+  grid-template-columns: 0 32px minmax(0, 1fr) auto;
+  grid-template-rows: 32px 32px auto;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 64px;
+  max-height: none;
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style.combat-sidebar .combat-tracker .combatant.defeated,
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style.combat-sidebar .combat-tracker .combatant.defeated .name {
+  color: var(--advanced-interface-text-color) !important;
+}
+
+:is(#sidebar .sidebar-tab, .sidebar-popout).advanced-interface-chat-style .combat-tracker .combatant[data-combatant-id].advanced-interface-card-thumbnail {
+  grid-template-columns: 64px 32px minmax(0, 1fr) auto;
+}
+
+.advanced-interface-chat-style .combatant > img.token-image {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  object-fit: cover;
+  mask-image: var(--advanced-interface-thumbnail-fade);
+}
+
+.advanced-interface-chat-style .combatant > .advanced-interface-card-menu-button {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.advanced-interface-chat-style .combatant > .token-name,
+.advanced-interface-chat-style .combatant > .token-name > .combatant-controls {
+  display: contents;
+}
+
+.advanced-interface-chat-style .combatant > .token-name > .name {
+  grid-column: 3 / -1;
+  grid-row: 1;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  padding: 0 8px 0 0;
+  overflow: hidden;
+  line-height: 32px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: 400;
+  font-style: normal;
+  color: var(--advanced-interface-text-color);
+}
+
+.advanced-interface-chat-style .combatant > .token-name > .combatant-controls {
+  --button-size: 32px;
+  --control-size: 32px;
+}
+
+.advanced-interface-chat-style .combatant :is(.advanced-interface-combatant-actions, .advanced-interface-combatant-initiative) > .combatant-control {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-16);
+  transition: none !important;
+  animation: none !important;
+}
+
+.advanced-interface-chat-style .combatant :is(.advanced-interface-combatant-actions, .advanced-interface-combatant-initiative) > .combatant-control * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.advanced-interface-chat-style .combatant .token-effects {
+  position: static;
+  grid-column: 2 / -1;
+  grid-row: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  min-width: 0;
+  gap: 4px;
+  height: auto;
+  margin: 0;
+  padding-inline-start: 0;
+  overflow: hidden;
+}
+
+.advanced-interface-chat-style .combatant .token-effects:empty {
+  display: none;
+}
+
+.advanced-interface-chat-style .combatant .token-effects > img {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: none;
+}
+
+.advanced-interface-chat-style .combatant > .advanced-interface-combatant-actions {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  height: 32px;
+  gap: 0;
+}
+
+.advanced-interface-chat-style .combatant .advanced-interface-combatant-initiative {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-width: 0;
+  height: 32px;
+  gap: 0;
+}
+
+.advanced-interface-chat-style :is(.advanced-interface-combatant-actions, .advanced-interface-combatant-initiative) > .combatant-control {
+  flex: 0 0 32px;
+}
+
+.advanced-interface-chat-style .advanced-interface-combatant-initiative > .token-initiative,
+.advanced-interface-chat-style .advanced-interface-combatant-actions > .token-resource {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style .advanced-interface-combatant-initiative > .token-initiative {
+  flex: 0 0 32px;
+}
+
+.advanced-interface-chat-style .advanced-interface-combatant-initiative .initiative-input {
+  box-sizing: border-box;
+  width: 28px;
+  min-width: 0;
+  height: 28px;
+  border-radius: 50%;
+  padding: 0;
+  text-align: center;
+}
+
+.advanced-interface-chat-style .advanced-interface-combatant-actions > .token-resource {
+  display: grid;
+  grid-template-columns: repeat(2, 32px);
+  flex: 0 0 64px;
+  gap: 0;
+}
+
+.advanced-interface-chat-style .advanced-interface-combatant-actions > .token-resource > :is(i, .resource) {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 32px;
+  text-align: center;
+}
+
+.advanced-interface-chat-style .advanced-interface-combatant-actions > .token-resource > .resource {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 1;
+  border-radius: 50%;
+  background: var(--advanced-interface-resource-background);
+}
+
+.advanced-interface-bastion-ineligible:not(:hover, :focus-visible) {
+  opacity: 0.4;
+}
+
+/* Combat Encounters: the encounter navigation bar, then (with an encounter) the encounter information bar. */
+.advanced-interface-chat-style .combat-tracker-header {
+  padding: 0;
+  gap: 4px;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent !important;
+}
+
+.advanced-interface-chat-style .combat-tracker-header > .encounter-name,
+.advanced-interface-chat-style .combat-tracker-header .encounter-title,
+.advanced-interface-chat-style .combat-tracker-header .control-buttons > .spacer,
+.advanced-interface-chat-style .combat-tracker-header > .encounter-controls:not(.combat),
+.advanced-interface-chat-style.combat-sidebar nav.combat-controls {
+  display: none;
+}
+
+.advanced-interface-chat-style .combat-tracker-header > :is(.encounters, .encounter-controls) {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  height: 32px;
+  gap: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--advanced-interface-toolbar-background);
+  color: var(--advanced-interface-text-color);
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-separator {
+  display: flex;
+  justify-content: center;
+  flex: 0 0 8px;
+  width: 8px;
+  overflow: visible;
+  line-height: 32px;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-name {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  height: 32px;
+  gap: 0;
+  margin: 0;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-name-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-name-icon > .advanced-interface-icon-disc {
+  background: var(--advanced-interface-hover-color);
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-name:is(:hover, :focus-within) > .advanced-interface-encounter-name-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-name > input {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  margin: 4px 8px 4px 0;
+  padding-inline: 4px;
+  border-radius: 2px;
+  font-size: var(--font-size-16);
+  line-height: 16px;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-name > input:focus-visible {
+  outline-offset: 5px;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-numbers,
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-cycle,
+.advanced-interface-chat-style .combat-tracker-header .encounter-controls > .control-buttons {
+  display: flex;
+  flex: none;
+  flex-wrap: nowrap;
+  gap: 0;
+  min-width: 0;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .encounters.advanced-interface-encounters-cycle .advanced-interface-encounter-numbers,
+.advanced-interface-chat-style .combat-tracker-header .encounters:not(.advanced-interface-encounters-cycle) .advanced-interface-encounter-cycle {
+  display: none;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .encounters > [data-action="trackerSettings"] {
+  margin-inline-start: auto;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .advanced-interface-encounter-current {
+  pointer-events: none;
+}
+
+/* Chat message cards: at least 64px and as tall as their content. No thumbnail; the header row is menu, author color,
+   sender name, then the timestamp, all in the shared card header font. */
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 64px;
+  max-height: none;
+  padding: 0;
+  /* Systems (dnd5e) draw the author's color as an inline border; the header color dot already shows it. */
+  border: none !important;
+  overflow: hidden;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card > .advanced-interface-card-menu-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card > .message-header {
+  position: static;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  box-sizing: border-box;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 0 0 32px;
+  gap: 0;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .advanced-interface-chat-color {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .advanced-interface-chat-color::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--advanced-interface-chat-author-color, transparent);
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .message-sender {
+  position: static;
+  display: block;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  line-height: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  gap: 0;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .message-sender .avatar {
+  display: none;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card :is(.message-sender, .message-sender :is(.name-stacked, .title), .message-timestamp) {
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: 400;
+  font-style: normal;
+  font-variant: normal;
+  text-transform: none;
+  letter-spacing: normal;
+  color: inherit;
+  text-shadow: none;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .message-timestamp {
+  opacity: 1;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .message-sender :is(.name-stacked, .title) {
+  display: block;
+  min-width: 0;
+  height: 32px;
+  overflow: hidden;
+  line-height: 32px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .message-sender .name-stacked > :not(:first-child) {
+  display: none;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .message-metadata {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 32px;
+  margin: 0;
+  padding: 0 8px;
+  gap: 0;
+  line-height: 32px;
+  transform: none;
+  translate: none;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card .message-metadata > :is(.chat-control[data-context-menu], .message-delete) {
+  display: none;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card > .message-content {
+  box-sizing: border-box;
+  height: auto;
+  margin: 0;
+  padding: 0 8px 8px;
+  overflow: hidden;
+}
+
+:is(.chat-sidebar .chat-log, .chat-popout > .window-content) > .chat-message.advanced-interface-card > .message-content > :is(.flavor-text, .whisper-to) {
+  display: block;
+  margin: 0 0 4px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Chat pop-outs: the window controls are 32px buttons at the right end of the card's top row. */
+.chat-popout:not(.minimized) > .window-header {
+  inset: 0 0 auto auto;
+  width: auto;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  gap: 0;
+}
+
+.chat-popout:not(.minimized) > .window-header :is(.window-icon, .window-title) {
+  display: none;
+}
+
+.chat-popout > .window-header .header-control {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--advanced-interface-button-icon-color, var(--advanced-interface-text-color));
+  font-size: var(--font-size-16);
+  text-shadow: none;
+}
+
+.chat-popout > .window-header [data-action="toggleControls"] {
+  display: none;
+}
+
+.chat-popout:has(> .window-content > .chat-message.advanced-interface-card-menu-open) > .window-header {
+  visibility: hidden;
+}
+
+.chat-popout > .window-content > .chat-message.advanced-interface-card .message-metadata {
+  padding-inline-end: 8px;
+  margin-inline-end: 32px;
+}
+
+/* Placeable cards are a single 32px header row (menu, type icon, name, then color, values and buttons); token cards
+   are 64px with the actor portrait on the left and the header row to its right. */
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-entry {
+  align-items: flex-start;
+  gap: 0;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  padding-inline-start: 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-entry.token {
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
+  overflow: hidden;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-entry.token > img.thumbnail {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  border: none;
+  object-fit: cover;
+  object-position: center;
+  mask-image: var(--advanced-interface-thumbnail-fade);
+}
+
+/* Leading type icons share the button hover and selected highlight colors. */
+.advanced-interface-chat-style.placeables-sidebar .advanced-interface-placeable-row-icon {
+  position: relative;
+}
+
+.advanced-interface-chat-style.placeables-sidebar :is(.placeable-entry, .group-header):is(:hover, .hovered, :focus-within, .active, .context) .advanced-interface-placeable-row-icon > .advanced-interface-icon-disc {
+  opacity: 1;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-entry:is(.active, .context):not(:hover, :focus-within) .advanced-interface-placeable-row-icon {
+  --advanced-interface-disc-color: var(--advanced-interface-selected-color);
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-entry > .description {
+  flex: 1;
+  gap: 0;
+  height: 32px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-entry > .controls {
+  display: flex;
+  flex: none;
+  height: 32px;
+  gap: 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar :is(.placeable-entry, .group-header) .color {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin-inline: 8px;
+  border: none;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-entry :is(.advanced-interface-placeable-toggle, .advanced-interface-placeable-indicator) {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-entry .advanced-interface-placeable-indicator:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+/* Region elevation as interval notation; the brackets and comma sit centered in the 8px gaps around the two value buttons. */
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .advanced-interface-region-range {
+  display: grid;
+  grid-template-columns: 8px 32px 8px 32px 8px;
+  flex: none;
+  align-items: center;
+  height: 32px;
+  margin-inline-start: auto;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .advanced-interface-region-range-mark {
+  display: flex;
+  justify-content: center;
+  width: 8px;
+  overflow: visible;
+  color: var(--color-text-primary);
+  line-height: 32px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .advanced-interface-region-range-value {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-14);
+  line-height: 32px;
+  text-align: center;
+}
+
+/* Drawing author bars and wall type bars are information control bars. */
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .group-header.advanced-interface-placeable-bar,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-group[data-author-id] > .group-header.advanced-interface-placeable-bar {
+  --advanced-interface-placeable-color: var(--advanced-interface-text-color);
+  box-sizing: border-box;
+  height: 32px;
+  gap: 0;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--advanced-interface-toolbar-background);
+  color: var(--advanced-interface-text-color);
+  text-shadow: none;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .group-header.advanced-interface-placeable-bar:hover {
+  outline: 1px solid var(--advanced-interface-hover-color);
+  outline-offset: -1px;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .group-header.advanced-interface-placeable-bar > .label {
+  flex: 1;
+  min-width: 0;
+}
+
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .group-header.advanced-interface-placeable-bar > .meta {
+  color: var(--advanced-interface-text-color);
+  pointer-events: none;
+}
+
+.advanced-interface-chat-style.placeables-sidebar .group-header > .advanced-interface-placeable-shutter {
+  flex: 0 0 32px;
+  margin-inline-start: auto;
+}
+
+.advanced-interface-placeable-shutter::before,
+.advanced-interface-placeable-shutter > .advanced-interface-icon-disc {
+  transform: rotate(0deg);
+}
+
+.advanced-interface-placeable-shutter[aria-expanded="false"]::before,
+.advanced-interface-placeable-shutter[aria-expanded="false"] > .advanced-interface-icon-disc {
+  transform: rotate(180deg);
+}
+
+.advanced-interface-chat-style.placeables-sidebar .placeable-group > .placeable-directory[hidden] {
+  display: none !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab.sidebar-popout, #chat-message, #hotbar) {
+  --advanced-interface-bar-color: var(--color-text-secondary);
+}
+
+.advanced-interface-navigation-group {
+  flex: 0 1 auto;
+  min-height: 32px;
+  overflow: hidden auto;
+}
+
+.advanced-interface-navigation-heading {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-left: 8px;
+  margin: 0;
+  border-radius: 6px;
+  background: var(--advanced-interface-toolbar-background);
+  color: var(--advanced-interface-bar-color);
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-navigation-heading > span {
+  flex: 1;
+}
+
+.advanced-interface-navigation-heading > button:not(:hover, :focus-visible, [aria-expanded="true"]) {
+  --advanced-interface-button-icon-color: var(--advanced-interface-bar-color);
+}
+
+.advanced-interface-navigation-scenes {
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.advanced-interface-navigation-scenes[hidden],
+.advanced-interface-navigation-scenes:empty {
+  display: none !important;
+}
+
+.scenes-sidebar.advanced-interface-scene-directory-hidden > :is(.directory-header, .directory-footer),
+.scenes-sidebar.advanced-interface-scene-directory-hidden > .window-content > :is(.directory-header, .directory-footer),
+.scenes-sidebar.advanced-interface-scene-directory-hidden .directory-list > :not(.advanced-interface-navigation-group) {
+  display: none !important;
+}
+
+/* Scene cards: the unfaded thumbnail fills the whole card as its background; the header starts at the panel edge. */
+.advanced-interface-chat-style.scenes-sidebar .directory-item.entry.scene > img.thumbnail {
+  position: absolute;
+  inset: 0;
+  flex: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mask-image: none;
+  pointer-events: none;
+}
+
+.advanced-interface-chat-style.scenes-sidebar .directory-item.entry.scene > :not(img.thumbnail, .advanced-interface-scene-users, .advanced-interface-card-header-background) {
+  position: relative;
+  z-index: 1;
+}
+
+.advanced-interface-chat-style.scenes-sidebar .advanced-interface-card-thumbnail > .advanced-interface-scene-users {
+  left: 0;
+}
+
+/* Disabled buttons stay hoverable so their tooltips can show. */
+:is(#sidebar.advanced-interface, .sidebar-popout, #interface) button:disabled {
+  pointer-events: auto;
+}
+
+.advanced-interface-chat-style .combat-tracker-header .encounter-controls > .control-buttons > button:disabled {
+  visibility: visible;
+}
+
+/* Number buttons share calendar highlight discs without changing the number color. */
+:is(#sidebar.advanced-interface, .sidebar-popout) .combat-tracker-header :is(.advanced-interface-encounter-numbers, .advanced-interface-encounter-cycle) > button:not(.icon),
+:is(#sidebar.advanced-interface, .sidebar-popout) #hotbar.advanced-interface-hotbar .advanced-interface-hotbar-pages > button:not(.icon) {
+  --advanced-interface-number-disc: transparent;
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-popout) .combat-tracker-header :is(.advanced-interface-encounter-numbers, .advanced-interface-encounter-cycle) > button:not(.icon)::before,
+:is(#sidebar.advanced-interface, .sidebar-popout) #hotbar.advanced-interface-hotbar .advanced-interface-hotbar-pages > button:not(.icon)::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 12px);
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--advanced-interface-number-disc);
+  pointer-events: none;
+  z-index: -1;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-popout) .combat-tracker-header :is(.advanced-interface-encounter-numbers, .advanced-interface-encounter-cycle) > button:not(.icon):not(:disabled):is(:hover, :focus-visible),
+:is(#sidebar.advanced-interface, .sidebar-popout) #hotbar.advanced-interface-hotbar .advanced-interface-hotbar-pages > button:not(.icon):not(:disabled):is(:hover, :focus-visible) {
+  --advanced-interface-number-disc: var(--advanced-interface-hover-color);
+  --advanced-interface-button-icon-color: var(--advanced-interface-on-highlight-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-popout) .combat-tracker-header :is(.advanced-interface-encounter-numbers, .advanced-interface-encounter-cycle) > button.active:not(.icon, :hover, :focus-visible),
+:is(#sidebar.advanced-interface, .sidebar-popout) #hotbar.advanced-interface-hotbar .advanced-interface-hotbar-pages > button.active:not(.icon, :hover, :focus-visible) {
+  --advanced-interface-number-disc: var(--advanced-interface-selected-color);
+  --advanced-interface-button-icon-color: var(--advanced-interface-on-highlight-color);
+}
+
+.advanced-interface-chat-style .combatant .token-effects:has(> .advanced-interface-effect-disc) {
+  gap: 0;
+}
+
+/* Effects use the same 32px cells and centered 24px discs as the action row. */
+.advanced-interface-chat-style .combatant .token-effects > .advanced-interface-effect-disc {
+  --advanced-interface-effect-disc-color: var(--advanced-interface-selected-color);
+  position: relative;
+  flex: 0 0 32px;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.advanced-interface-chat-style .combatant .token-effects > .advanced-interface-effect-disc:is(:hover, :focus-visible) {
+  --advanced-interface-effect-disc-color: var(--advanced-interface-hover-color);
+}
+
+body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .combatant .token-effects > .advanced-interface-effect-disc::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--advanced-interface-effect-disc-color) !important;
+  pointer-events: none;
+}
+
+.advanced-interface-chat-style .combatant .token-effects > .advanced-interface-effect-disc::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  background: var(--advanced-interface-on-highlight-color);
+  mask: var(--advanced-interface-effect-icon) center / contain no-repeat;
+  z-index: 1;
+}
+
+/* Preserve native palettes without reverting this module's geometry. revert-layer lets Foundry and the game system
+   supply their original colors, including textured chat cards and theme-specific form controls. */
+:is(#sidebar.advanced-interface, .sidebar-tab.sidebar-popout, .chat-popout) :is(
+  .directory-header button, .directory-footer button, .settings-sidebar button:not(.header-control),
+  .editor-menu button, .folder-header .create-button, .combatant .inline-control
+):not(:hover, :focus-visible, :active, .active, [aria-pressed="true"], [aria-expanded="true"]) {
+  --button-text-color: revert-layer;
+  --advanced-interface-button-icon-color: var(--button-text-color);
+  color: var(--advanced-interface-search-leader-color, revert-layer) !important;
+  background: revert-layer !important;
+  border-color: revert-layer !important;
+}
+
+.advanced-interface-chat-style :is(.directory-header input, .directory-header select, input[type="range"]) {
+  --input-text-color: revert-layer;
+  color: revert-layer;
+}
+
+.advanced-interface-chat-style .folder-header .folder-name {
+  color: var(--color-light-2) !important;
+}
+
+.advanced-interface-chat-style.settings-sidebar {
+  color: var(--color-text-secondary);
+}
+
+/* Foundry/system layers own card colors. Revert only palette properties, never
+   geometry or backgrounds; icons inherit that same native color. */
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) .advanced-interface-card,
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) .advanced-interface-card *,
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) .advanced-interface-card *::before,
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) .advanced-interface-card *::after {
+  color: revert-layer !important;
+  --button-text-color: revert-layer;
+  --control-icon-color: revert-layer;
+  --advanced-interface-button-icon-color: currentColor !important;
+  --advanced-interface-on-highlight-color: currentColor;
+}
+
+.advanced-interface-chat-style.settings-sidebar > .window-content {
+  color: var(--color-text-secondary);
+}
+
+.themed.theme-light.advanced-interface-chat-style.settings-sidebar :is(h4.divider, .title) {
+  --advanced-interface-settings-color: var(--color-text-emphatic);
+}
+
+.advanced-interface-chat-style.settings-sidebar a:not(.button, :hover, :focus-visible, :active) {
+  color: revert-layer !important;
+}
+
+:is(#sidebar.advanced-interface .settings-sidebar, .sidebar-tab.sidebar-popout.settings-sidebar) .sidebar-info a:not(:hover, :focus-visible, :active) {
+  color: var(--sidebar-info-link-color, var(--color-text-hyperlink)) !important;
+}
+
+.advanced-interface-chat-style.settings-sidebar :is(h4.divider, .title) {
+  border-color: currentColor;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab.sidebar-popout) .directory-header .advanced-interface-create:not(:hover, :focus-visible, :active) {
+  background: var(--button-background-color) !important;
+  border-color: var(--button-border-color) !important;
+}
+
+#sidebar.advanced-interface > #sidebar-tabs > menu > li > [data-tab]:not(:hover, :focus-visible, :active, [aria-pressed="true"]),
+#sidebar.advanced-interface #scene-controls .ui-control:not(:hover, :focus-visible, :active, .active, [aria-pressed="true"]),
+#scene-controls .ui-control:not(:hover, :focus-visible, :active, .active, [aria-pressed="true"]) {
+  border-color: var(--control-border-color) !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab.sidebar-popout) .chat-message.advanced-interface-card {
+  border-color: revert-layer !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab.sidebar-popout) #chat-message .editor-container {
+  border-color: var(--border-color);
+}
+
+#hotbar.advanced-interface-hotbar {
+  color: var(--color-light-3);
+}
+
+.advanced-interface-matched-popout > .window-header {
+  --control-icon-color: var(--color-text-primary);
+}
+
+.advanced-interface-matched-popout > .window-header .window-title {
+  color: var(--color-text-primary);
+}
+
+.advanced-interface-matched-popout > .window-header .header-control {
+  --button-text-color: var(--advanced-interface-text-color);
+  --advanced-interface-button-icon-color: var(--advanced-interface-text-color);
+  color: var(--advanced-interface-text-color) !important;
+}
+
+.advanced-interface-player-window {
+  background: var(--advanced-interface-card-color);
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab.sidebar-popout) :is(
+  .directory-header, .directory-footer, .combat-tracker-header, .combat-controls,
+  .advanced-interface-time-controls, .advanced-interface-settings-toolbar,
+  .advanced-interface-settings-actions, .global-control, .playlist-header,
+  .sound-controls, .sound-playback, #chat-controls, .editor-menu,
+  #hotbar-controls-right, #performance-stats
+) :is(button, a.button, .ui-control):not(:where(
+  .advanced-interface-encounter-numbers > button,
+  .advanced-interface-encounter-cycle > button:not(.icon),
+  .advanced-interface-hotbar-pages > button:not(.icon)
+)) {
+  background: transparent !important;
+}
+
+:is(#sidebar.advanced-interface, .sidebar-tab.sidebar-popout) :is(
+  .directory-header, .directory-footer, .combat-tracker-header, .combat-controls,
+  .advanced-interface-time-controls, .advanced-interface-settings-toolbar,
+  .advanced-interface-settings-actions, .global-control, .playlist-header,
+  .sound-controls, .sound-playback, #chat-controls, .editor-menu,
+  #hotbar-controls-right, #performance-stats
+) :is(button, a.button, .ui-control) {
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout),
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) * {
+  text-shadow: none !important;
+}
+
+:is(#sidebar.advanced-interface, .advanced-interface-matched-popout, .advanced-interface-player-window, .chat-popout) :is(
+  h1, h2, h3, h4, h5, h6, p, a, label, strong, em, small,
+  .entry-name, .folder-name, .source, .player-name, .window-title, .advanced-interface-tab-label
+) {
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+
+/* Stock foundry2.css .placeable-hud supplies control semantics and theme variables.
+   Keep our horizontal geometry and opaque panel fills; glyphs use native --color-text-primary. */
+.placeable-hud.advanced-interface-fixed-hud {
+  transform: scale(var(--advanced-interface-hud-inverse-zoom)) !important;
+  transform-origin: top left;
+  width: var(--advanced-interface-hud-width) !important;
+  height: var(--advanced-interface-hud-height) !important;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud {
+  --advanced-interface-hud-size: 32px;
+  --advanced-interface-hud-gap: 4px;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud > .col {
+  display: none;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-rows {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--advanced-interface-hud-gap);
+  width: max-content;
+  max-width: 212px;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  max-width: 212px;
+  gap: var(--advanced-interface-hud-gap);
+}
+
+#token-hud.advanced-interface-placeable-hud .advanced-interface-hud-rows {
+  top: var(--advanced-interface-hud-rows-top, calc(100% + 10px));
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-wrapping-row {
+  max-width: calc(6 * var(--advanced-interface-hud-size) + 5 * var(--advanced-interface-hud-gap));
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-slot {
+  position: relative;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .attribute {
+  flex: 0 0 50px;
+  width: 50px;
+  height: var(--advanced-interface-hud-size);
+}
+
+#token-hud.advanced-interface-placeable-hud .attribute:is(.bar1, .bar2, .elevation) {
+  flex-basis: var(--advanced-interface-hud-size);
+  width: var(--advanced-interface-hud-size);
+  color: var(--advanced-interface-resource-foreground, var(--advanced-interface-text-color));
+}
+
+#token-hud.advanced-interface-placeable-hud .attribute.bar1 {
+  flex-basis: calc(2 * var(--advanced-interface-hud-size) + 4px);
+  width: calc(2 * var(--advanced-interface-hud-size) + 4px);
+}
+
+#token-hud.advanced-interface-placeable-hud .advanced-interface-hud-row:has(> .advanced-interface-hud-slot > .attribute.bar2 input) .attribute.bar1 {
+  flex-basis: var(--advanced-interface-hud-size);
+  width: var(--advanced-interface-hud-size);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .attribute input {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--advanced-interface-hud-size);
+  min-height: var(--advanced-interface-hud-size);
+  margin: 0;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--advanced-interface-toolbar-color);
+  box-shadow: none;
+  font-size: var(--font-size-16);
+  line-height: normal;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .attribute:is(.elevation, .bar1, .bar2) input {
+  color: var(--advanced-interface-resource-foreground, var(--advanced-interface-text-color));
+  border: 1px solid transparent;
+  outline: none;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .attribute:is(.elevation, .bar1, .bar2) input:hover {
+  border-color: var(--advanced-interface-hover-color, #4f4fff);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .attribute:is(.elevation, .bar1, .bar2) input:focus {
+  border-color: var(--advanced-interface-hover-color, #4f4fff);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud :is(button.control-icon, button.effect-control) {
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--advanced-interface-hud-size);
+  width: var(--advanced-interface-hud-size);
+  height: var(--advanced-interface-hud-size);
+  min-height: var(--advanced-interface-hud-size);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 4px;
+  background: var(--advanced-interface-toolbar-color);
+  color: var(--color-text-primary);
+  box-shadow: none;
+  font-size: var(--font-size-16);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud :is(button, .palette-list-entry) img {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  opacity: 1;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud :is(button, .attribute input):is(:disabled, [readonly], [aria-disabled="true"]) {
+  opacity: 1;
+  filter: none;
+  color: color-mix(in srgb, var(--color-text-primary) 50%, transparent);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud button:is(:disabled, [aria-disabled="true"]) img {
+  opacity: 0.5;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette {
+  top: calc(100% + var(--advanced-interface-hud-gap));
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  z-index: 1;
+  gap: 0;
+  box-shadow: none;
+  box-sizing: border-box;
+  max-width: 206px;
+  white-space: normal;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette:not(.palette-list) {
+  display: grid;
+  grid-template-columns: repeat(6, var(--advanced-interface-hud-size));
+  grid-auto-rows: var(--advanced-interface-hud-size);
+  width: max-content;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette,
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette *,
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette *::before,
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette *::after {
+  transition: none !important;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette.status-effects {
+  grid-template-columns: repeat(5, var(--advanced-interface-hud-size));
+  width: max-content;
+  height: auto;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .status-effects > button.effect-control {
+  background: transparent;
+  opacity: 1;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette-list-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-height: var(--advanced-interface-hud-size);
+  border: 0;
+  background: transparent;
+  color: var(--advanced-interface-text-color);
+  font-family: var(--font-body);
+  font-size: var(--font-size-16);
+  font-weight: 400;
+  line-height: 24px;
+  box-shadow: none;
+  text-shadow: none;
+  text-align: start;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette-list-entry > i {
+  flex: 0 0 32px;
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size-16);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette[data-palette="movementActions"] {
+  width: max-content;
+  min-width: 142px;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette[data-palette="movementActions"] > .palette-list-entry {
+  justify-content: flex-start;
+  text-align: left;
+  flex: 0 0 var(--advanced-interface-hud-size);
+  height: var(--advanced-interface-hud-size);
+  margin-block: 0;
+  align-self: stretch;
+  box-shadow: none;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette :is(button, .palette-list-entry) {
+  outline: none;
+  box-shadow: none;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette-list-entry:is(:hover, :focus-visible) {
+  background: var(--color-control-hover);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette[data-palette="movementActions"] > .palette-list-entry > i {
+  box-sizing: border-box;
+  width: 32px;
+  padding: 0;
+  text-align: center;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette-list-entry > span:not(.advanced-interface-hud-image-disc) {
+  display: flex;
+  align-items: center;
+  gap: var(--advanced-interface-hud-gap);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette-list-entry > span > :is(img, i) {
+  flex: 0 0 16px;
+  margin-inline: 8px;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-image-button {
+  position: relative;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-image-button::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 32px;
+  height: 32px;
+  background: currentColor;
+  mask: var(--advanced-interface-hud-image) center / 16px 16px no-repeat;
+  pointer-events: none;
+  z-index: 1;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette-list-entry.advanced-interface-hud-image-button::before {
+  left: 6px;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-image-disc {
+  background: var(--advanced-interface-hover-color, #4f4fff);
+  z-index: -1;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-image-button:not(:disabled):is(:hover, :focus-visible, :active, .active, [aria-pressed="true"]) > .advanced-interface-hud-image-disc {
+  opacity: 1;
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-image-button:is(:active, .active, [aria-pressed="true"]):not(:hover, :focus-visible) > .advanced-interface-hud-image-disc {
+  background: var(--advanced-interface-selected-color, #ff3f00);
+}
+
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .advanced-interface-hud-image-button img {
+  opacity: 0;
+}
+
+.advanced-interface-actor-navigation {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-height: 32px;
+  overflow: hidden;
+}
+
+.actors-sidebar.advanced-interface-actor-directory-hidden > :is(.directory-header, .directory-list, .directory-footer),
+.actors-sidebar.advanced-interface-actor-directory-hidden > .window-content > :is(.directory-header, .directory-list, .directory-footer),
+.items-sidebar.advanced-interface-item-directory-hidden > :is(.directory-header, .directory-list, .directory-footer),
+.items-sidebar.advanced-interface-item-directory-hidden > .window-content > :is(.directory-header, .directory-list, .directory-footer) {
+  display: none !important;
+}
+
+.advanced-interface-actor-navigation-heading {
+  display: flex;
+  flex: 0 0 32px;
+  align-items: center;
+  min-height: 32px;
+  padding-inline-start: 8px;
+  border-radius: 6px;
+  background: var(--advanced-interface-toolbar-background, color-mix(in srgb, var(--color-text-primary) 12%, transparent));
+  color: var(--advanced-interface-bar-color, var(--color-text-primary));
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-actor-navigation-heading > span {
+  flex: 1;
+}
+
+.advanced-interface-actor-navigation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.advanced-interface-actor-navigation-list[hidden],
+.advanced-interface-actor-navigation-list:empty {
+  display: none !important;
+}
+
+.actors-sidebar .directory-item.entry.actor,
+.items-sidebar .directory-item.entry.item {
+  position: relative;
+}
+
+.actors-sidebar.advanced-interface-chat-style .directory-item.entry.actor > .entry-name,
+.items-sidebar.advanced-interface-chat-style .directory-item.entry.item > .entry-name {
+  padding-inline-end: 8px;
+}
+
+.advanced-interface-chat-style:is(.actors-sidebar, .items-sidebar) .directory-item.entry.document:has(> .advanced-interface-actor-navigation-toggle) > .entry-name {
+  padding-inline-end: 40px;
+}
+
+.actors-sidebar .directory-item.entry.actor:has(> .advanced-interface-actor-navigation-toggle)
+  > .advanced-interface-primary-party-button {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  z-index: 2;
+}
+
+.actors-sidebar.advanced-interface-chat-style .directory-item.entry.actor:has(> .advanced-interface-primary-party-button):has(> .advanced-interface-actor-navigation-toggle)
+  > .entry-name {
+  padding-inline-end: 72px;
+}
+
+:is(.actors-sidebar, .items-sidebar) .directory-item.entry.document > .advanced-interface-actor-navigation-toggle {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.advanced-interface-chat-style:is(.actors-sidebar, .items-sidebar) .advanced-interface-actor-navigation-entry {
+  background: var(--advanced-interface-card-background);
+  border: 1px solid var(--advanced-interface-card-border);
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.advanced-interface-actor-navigation-shutter[aria-expanded="false"]::before,
+.advanced-interface-actor-navigation-shutter[aria-expanded="false"] > .advanced-interface-icon-disc {
+  transform: scaleY(-1);
+}
+
+.sidebar-tab.advanced-interface-bottom-row :is(.advanced-interface-player-shutter, .advanced-interface-placeable-shutter)::before,
+.sidebar-tab.advanced-interface-bottom-row :is(.advanced-interface-player-shutter, .advanced-interface-placeable-shutter) > .advanced-interface-icon-disc,
+#sidebar.advanced-interface .advanced-interface-bottom-row .advanced-interface-time-controls > button.advanced-interface-shutter::before,
+#sidebar.advanced-interface .advanced-interface-bottom-row .advanced-interface-time-controls > button.advanced-interface-shutter > .advanced-interface-icon-disc {
+  transform: scaleY(-1);
+}
+
+.sidebar-tab.advanced-interface-bottom-row :is(.advanced-interface-player-shutter, .advanced-interface-placeable-shutter)[aria-expanded="false"]::before,
+.sidebar-tab.advanced-interface-bottom-row :is(.advanced-interface-player-shutter, .advanced-interface-placeable-shutter)[aria-expanded="false"] > .advanced-interface-icon-disc,
+#sidebar.advanced-interface .advanced-interface-bottom-row .advanced-interface-time-controls > button.advanced-interface-shutter[aria-expanded="true"]::before,
+#sidebar.advanced-interface .advanced-interface-bottom-row .advanced-interface-time-controls > button.advanced-interface-shutter[aria-expanded="true"] > .advanced-interface-icon-disc {
+  transform: none;
+}
+
+.sidebar-tab.advanced-interface-panel-scroll,
+.sidebar-tab > .window-content.advanced-interface-panel-scroll {
+  flex-direction: column;
+  overflow: hidden auto !important;
+  min-height: 0;
+  scrollbar-gutter: auto;
+  padding-inline-end: 0 !important;
+  row-gap: 4px !important;
+}
+
+.sidebar-tab.advanced-interface-panel-scroll.advanced-interface-panel-overflow,
+.sidebar-tab > .window-content.advanced-interface-panel-scroll.advanced-interface-panel-overflow {
+  padding-inline-end: 4px !important;
+}
+
+.advanced-interface-panel-scroll > *,
+.advanced-interface-panel-scroll .advanced-interface-panel-section {
+  flex-shrink: 0 !important;
+}
+
+.advanced-interface-panel-scroll .advanced-interface-panel-section {
+  --advanced-interface-scroll-gap: 0px !important;
+  overflow: visible !important;
+  max-height: none !important;
+  margin-block: 0;
+}
+
+.advanced-interface-panel-scroll :is(
+  .advanced-interface-navigation-group, .advanced-interface-actor-navigation,
+  .advanced-interface-utility-content, .placeable-tab
+) {
+  display: contents !important;
+}
+
+.advanced-interface-panel-scroll .advanced-interface-panel-control {
+  position: sticky;
+  top: var(--advanced-interface-sticky-offset, 0px);
+  z-index: 10;
+  margin-block: 0;
+  border-radius: 6px !important;
+  /* Reuse the panel toolbar fill; clipping in sidebar-scrolling.mjs keeps sticky gaps transparent. */
+  background-color: var(--advanced-interface-toolbar-background, transparent);
+}
+
+.advanced-interface-panel-scroll .directory-footer:empty {
+  display: none;
+}
+
+.advanced-interface-panel-scroll .advanced-interface-hotbar.advanced-interface-panel-control,
+.advanced-interface-panel-scroll .chat-form.advanced-interface-panel-control {
+  background-color: transparent;
+}
+
+.advanced-interface-panel-scroll > :is(.directory-list, .combat-tracker):not(:has(*)) {
+  display: none;
+}
+
+.advanced-interface-panel-scroll :is(
+  .advanced-interface-navigation-scenes, .advanced-interface-actor-navigation-list
+):empty {
+  display: none !important;
+}
+
+.advanced-interface-panel-scroll .advanced-interface-panel-control.advanced-interface-sticky-bottom {
+  top: auto;
+  bottom: var(--advanced-interface-sticky-offset, 0px);
+}
+
+}
+
+/* Control panel palettes (region, lighting, etc.) render at full size; core defaults them to scale 0.8. */
+.application.placeable-palette {
+  transform: none !important;
+}
+
+/* The module hides palette scrollbars, so core's stable scrollbar gutter would only leave blank space on the right. */
+.application.placeable-palette .standard-form.scrollable {
+  scrollbar-gutter: auto !important;
+}
+
+#scene-controls-layers > li {
+  position: relative;
+}
+
+#scene-controls-layers .advanced-interface-layer-pip {
+  position: absolute;
+  top: -1px;
+  right: -2px;
+  pointer-events: none;
+}
