@@ -1,5 +1,5 @@
 import {decorateIconButtons} from "./interface-components.mjs";
-import {isManagedSidebarTab, localize} from "./helper.mjs";
+import {isManagedSidebarTab, localize, setButtonLabel} from "./helper.mjs";
 
 // Sidebar cards get an Options button; their context menu opens as inline actions in the card's top row.
 const CARD_MENU_ROOTS = "#sidebar, .sidebar-tab, .placeable-tab, #players, .advanced-interface-player-window, .chat-popout";
@@ -237,8 +237,7 @@ export function registerCardMenus() {
           const button = root.ownerDocument.createElement("button");
           button.type = "button";
           button.className = "ui-control icon fa-solid fa-ellipsis-vertical advanced-interface-card-menu-button";
-          button.ariaLabel = localize("Cards.Menu");
-          button.dataset.tooltip = button.ariaLabel;
+          setButtonLabel(button, localize("Cards.Menu"));
           button.setAttribute("aria-expanded", "false");
           button.addEventListener("click", event => {
             event.preventDefault();
@@ -316,8 +315,7 @@ export function registerCardMenus() {
       for (const item of menu.querySelectorAll(".context-item")) {
         item.setAttribute("role", "button");
         item.tabIndex = 0;
-        item.ariaLabel = item.textContent.trim();
-        item.dataset.tooltip = item.ariaLabel;
+        setButtonLabel(item, item.textContent.trim());
         item.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();

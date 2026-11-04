@@ -1,5 +1,7 @@
 # Advanced Interface
 
+**Release:** 2.0.0.
+
 A complete interface overhaul for Foundry VTT v14 and the D&D 5e system. It replaces the stock sidebar, scene controls, chat, combat tracker, players list, token HUD and settings screens with a cohesive card-based layout, and adds several quality-of-life tools for GMs and players.
 
 **Requirements:** Foundry VTT v14 and the D&D 5e system 6.0.6 or newer.
@@ -61,7 +63,7 @@ https://github.com/Conjectural-Technologies/advanced-interface/releases/latest/d
 
 ### Time and calendar
 - A Time panel with date and time editing and forward and back buttons in steps of 1 minute, 10 minutes, 1 hour, 8 hours, 1 day or 7 days.
-- A **Fixed Calendar** option with 14 months, an intercalary month, seven weekdays, two rest days and four seasons.
+- A **Fixed Calendar** option with 13 standard months, 1 intercalary month, 7 days in a week, 2 days of rest, and four seasons.
 
 ### Token HUD, resource bars and rings
 - HUD buttons sit in aligned rows with equal spacing below the token's highlight ring.

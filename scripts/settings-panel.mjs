@@ -1,4 +1,4 @@
-import {createButton, createIcon, localize, reportError} from "./helper.mjs";
+import {createButton, createIcon, localize, reportError, setButtonLabel} from "./helper.mjs";
 import {decorateLeadingIcons} from "./interface-components.mjs";
 
 // Settings panel: a compact toolbar, native action sections and merged system information.
@@ -118,8 +118,7 @@ Hooks.on("renderSettings", (app, element) => {
     const icon = button.querySelector("i");
     if (!icon) throw new Error("Advanced Interface | Settings button is missing its icon.");
     const label = button.textContent.trim();
-    button.setAttribute("aria-label", label);
-    button.dataset.tooltip = label;
+    setButtonLabel(button, label);
     button.dataset.tooltipDirection = "DOWN";
     button.classList.add("advanced-interface-settings-button");
     for (const node of Array.from(button.childNodes)) {

@@ -1,5 +1,5 @@
 import {decorateIconButtons} from "./interface-components.mjs";
-import {localize, MODULE_ID, reportError} from "./helper.mjs";
+import {localize, MODULE_ID, reportError, setButtonLabel} from "./helper.mjs";
 
 // Scene Controls: an idle control and tool, and a second column for wall, drawing and region type tools.
 const TYPE_TOOLS = {
@@ -79,8 +79,7 @@ function layoutSceneTools(app, element) {
     button.type = "button";
     button.className = `ui-control icon ${app.controls.walls.tools.wall.icon}`;
     button.dataset.typeLauncher = control;
-    button.ariaLabel = localize("Controls.DrawShape");
-    button.dataset.tooltip = button.ariaLabel;
+    setButtonLabel(button, localize("Controls.DrawShape"));
     li.append(button);
     menu.querySelector('[data-tool="select"]').closest("li").after(li);
   }

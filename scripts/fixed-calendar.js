@@ -29,13 +29,13 @@ const fixedCalendarConfig = {
     },
     days: {
         values: [
-            { name: "Moonday",  abbreviation: "M",  ordinal: 1 },
-            { name: "Tidesday", abbreviation: "T",  ordinal: 2 },
-            { name: "Windsday", abbreviation: "W",  ordinal: 3 },
-            { name: "Earthday", abbreviation: "R",  ordinal: 4 },
-            { name: "Fireday",  abbreviation: "F",  ordinal: 5 },
-            { name: "Starsday", abbreviation: "S",  ordinal: 6, isRestDay: true },
-            { name: "Sunday",   abbreviation: "U",  ordinal: 7, isRestDay: true }
+            { name: "Sunday",   abbreviation: "U",  ordinal: 1, isRestDay: true },
+            { name: "Moonday",  abbreviation: "M",  ordinal: 2 },
+            { name: "Tidesday", abbreviation: "T",  ordinal: 3 },
+            { name: "Windsday", abbreviation: "W",  ordinal: 4 },
+            { name: "Earthday", abbreviation: "R",  ordinal: 5 },
+            { name: "Fireday",  abbreviation: "F",  ordinal: 6 },
+            { name: "Starsday", abbreviation: "S",  ordinal: 7, isRestDay: true }
         ],
         daysPerYear: 365,
         hoursPerDay: 24,

@@ -1,6 +1,7 @@
-import {MODULE_ID} from "./helper.mjs";
+import {MODULE_ID, reportError} from "./helper.mjs";
 
 const SETTING = "fixedHUDSize";
+const reportZoomError = reportError("Zoom controls");
 const fixedIcons = new Map();
 const fixedSizes = { hud: false, doors: false };
 
@@ -102,7 +103,7 @@ export function registerHUDScale() {
             const tool = ui.controls.controls.advancedInterfaceZoom.tools[key];
             tool.active = game.settings.get(MODULE_ID, key);
             ui.controls.render();
-            Hooks.onError(`${MODULE_ID} | Zoom controls`, error, { log: "error", notify: "error" });
+            reportZoomError(error);
           });
         }
       }]))
