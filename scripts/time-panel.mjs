@@ -326,16 +326,19 @@ export function createTimePanel(UtilityPanel) {
         button(doc, "play", localize("Time.NextMonth"), () => cycle(1)));
       const grid = doc.createElement("div");
       grid.className = "advanced-interface-calendar-grid";
-      grid.style.setProperty("--calendar-weekdays", calendar.days.values.length);
-      calendar.days.values.forEach(day => {
-        const label = doc.createElement("abbr");
-        label.title = game.i18n.localize(day.name);
-        label.textContent = game.i18n.localize(day.abbreviation || day.name).slice(0, 3);
-        grid.append(label);
-      });
       const first = calendar.timeToComponents(calendar.componentsToTime(dateComponents(this.#year, this.#month, 1, 0, 0)));
       const weekdayCount = calendar.days.values.length;
-      const offset = ((first.dayOfWeek % weekdayCount) + weekdayCount) % weekdayCount;
+      const intercalary = first.dayOfWeek === null;
+      grid.style.setProperty("--calendar-weekdays", intercalary ? 1 : weekdayCount);
+      if (!intercalary) {
+        calendar.days.values.forEach(day => {
+          const label = doc.createElement("abbr");
+          label.title = game.i18n.localize(day.name);
+          label.textContent = game.i18n.localize(day.abbreviation || day.name).slice(0, 3);
+          grid.append(label);
+        });
+      }
+      const offset = intercalary ? 0 : ((first.dayOfWeek % weekdayCount) + weekdayCount) % weekdayCount;
       for (let index = 0; index < offset; index++) grid.append(doc.createElement("span"));
       const month = calendar.months.values[this.#month];
       const count = calendar.isLeapYear(this.#year) ? (month.leapDays ?? month.days) : month.days;

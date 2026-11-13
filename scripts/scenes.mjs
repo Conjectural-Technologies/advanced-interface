@@ -1,6 +1,6 @@
 import {decorateDocumentIcons, decorateIconButtons} from "./interface-components.mjs";
-import {MODULE_ID, cloneWithButtonActions, createButton, createIcon, localize, reportError,
-  syncDirectoryVisibility} from "./helper.mjs";
+import {MODULE_ID, cloneWithButtonActions, createButton, createIcon, getPanelSetting, localize, reportError,
+  setPanelSettings, syncDirectoryVisibility} from "./helper.mjs";
 
 let navigationExpanded = true;
 
@@ -220,16 +220,16 @@ let toolSelectionRestored = false;
 function rememberSelectedTool(app) {
   if (!toolSelectionRestored || !canvas.ready || !app.control || !app.tool) return;
   const selection = {control: app.control.name, tool: app.tool.name};
-  const saved = game.settings.get(MODULE_ID, "selectedTool");
+  const saved = getPanelSetting("selectedTool", {});
   if (saved.control === selection.control && saved.tool === selection.tool) return;
-  game.settings.set(MODULE_ID, "selectedTool", selection).catch(reportError("Saving selected tool"));
+  setPanelSettings({selectedTool: selection}).catch(reportError("Saving selected tool"));
 }
 
 Hooks.on("activateSceneControls", rememberSelectedTool);
 Hooks.on("renderSceneControls", rememberSelectedTool);
 Hooks.once("canvasReady", () => {
   const restore = async () => {
-    const saved = game.settings.get(MODULE_ID, "selectedTool");
+    const saved = getPanelSetting("selectedTool", {});
     if (saved.control) {
       const control = ui.controls.controls[saved.control];
       const tool = control?.tools[saved.tool];

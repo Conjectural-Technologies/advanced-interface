@@ -82,6 +82,7 @@ export function syncHUDScale() {
     element.style.setProperty("--advanced-interface-hud-width", `${bounds.width / scale}px`);
     element.style.setProperty("--advanced-interface-hud-height", `${bounds.height / scale}px`);
   }
+  canvas.advancedCards?.positionHUD();
 }
 
 export function registerHUDScale() {
@@ -91,7 +92,7 @@ export function registerHUDScale() {
   Hooks.on("getSceneControlButtons", controls => {
     controls.advancedInterfaceZoom = {
       name: "advancedInterfaceZoom", title: "ADVANCED_INTERFACE.FixedHUDSize",
-      icon: "fa-solid fa-arrows-to-circle", order: (controls.tokens?.order ?? 0) - 1,
+      icon: "fa-solid fa-arrows-to-circle", order: (controls.advancedCards?.order ?? 65) + 1,
       tools: Object.fromEntries([
         [SETTING, "HUD", "fa-solid fa-grip"],
         ["fixedDoorSize", "Doors", "fa-solid fa-door-open"]

@@ -2,6 +2,9 @@
 import {registerUtilityPanels} from "./utility-panels.mjs";
 import {registerChatLog} from "./chat.mjs";
 import {registerCardMenus} from "./card-menus.mjs";
+import {registerCards} from "./cards.mjs";
+import {registerCardCanvas} from "./card-canvas.mjs";
+import {registerCardTools} from "./card-tools.mjs";
 import "./combat.mjs";
 import "./directories.mjs";
 import {registerInterfaceComponents} from "./interface-components.mjs";
@@ -9,6 +12,7 @@ import {registerMacroApps} from "./macros.mjs";
 import {patchPlaylistTimestamps} from "./playlists.mjs";
 import {patchPopoutClose} from "./popouts.mjs";
 import {registerSceneControlTools} from "./scene-controls.mjs";
+import {registerGridSnapping} from "./grid-snapping.mjs";
 import {registerSceneDocument} from "./scenes.mjs";
 import "./scrollbars.mjs";
 import {registerSettingsMenu} from "./settings-panel.mjs";
@@ -22,7 +26,7 @@ import {onRenderNavigationDirectory, refreshActorDirectories, refreshActorNaviga
   onRenderTokenNavigationHUD, onTokenNavigationChange, clearTokenNavigation} from "./actor-navigation.mjs";
 import {onRenderSidebarScrolling, onCloseSidebarScrolling} from "./sidebar-scrolling.mjs";
 import {registerDoorButtons} from "./door-buttons.mjs";
-import {DIRECTORY_VISIBILITY, MODULE_ID, syncDirectoryVisibility} from "./helper.mjs";
+import {MODULE_ID, syncDirectoryVisibility} from "./helper.mjs";
 
 Hooks.once("diceSoNiceInit", dice3d => {
   const computeDimensions = dice3d._computeDimensions;
@@ -35,32 +39,22 @@ Hooks.once("diceSoNiceInit", dice3d => {
 });
 
 function registerSettings() {
-  for (const [key, type, initial] of [
-    ["tabOrder", Array, []],
-    ["tabSides", Object, {}],
-    ["tabRows", Object, {}],
-    ["selectedTool", Object, {}],
-    ["panelStates", Object, {}]
-  ]) {
-    game.settings.register(MODULE_ID, key, {scope: "client", config: false, type, default: initial});
-  }
-  for (const [tab, {setting}] of Object.entries(DIRECTORY_VISIBILITY)) {
-    game.settings.register(MODULE_ID, setting, {
-      scope: "client", config: false, type: Boolean, default: false,
-      onChange: () => syncDirectoryVisibility(tab)
-    });
-  }
+  game.settings.register(MODULE_ID, "worldPanelSettings", {scope: "client", config: false, type: Object, default: {}});
 }
 
 Hooks.once("init", () => {
   // Core registers its settings after init, so this becomes the uiConfig default and the UI Configuration reset value.
   foundry.applications.settings.menus.UIConfig.schema.fields.chatNotifications.initial = "pip";
   registerCardMenus();
+  registerCards();
+  registerCardCanvas();
+  registerCardTools();
   registerTokenEffects();
   registerHUDScale();
   registerHUDAutoClose();
   registerDoorButtons();
   registerInterfaceComponents();
+  registerGridSnapping();
   registerSceneControlTools();
   registerSettingsMenu();
   registerUtilityPanels(AdvancedSidebar);

@@ -1,0 +1,38 @@
+<section class="tab advanced-interface-stack-cards {{#if tab.active}}active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  <input class="advanced-interface-card-search" type="search" placeholder="{{localize 'SIDEBAR.Search' types=(localize 'DOCUMENT.Cards')}}" aria-label="{{localize 'ADVANCED_INTERFACE.PlayingCards.Search'}}">
+  <div class="advanced-interface-card-columns">
+    <span class="sort">{{#unless isPile}}<button type="button" class="icon fa-solid fa-sort" data-action="toggleSort" data-tooltip="CARDS.ACTIONS.ToggleSortMode" aria-label="{{localize 'CARDS.ACTIONS.ToggleSortMode'}}"></button>{{/unless}}</span>
+    <span class="name">{{localize "DOCUMENT.FIELDS.name.label"}}</span><span class="type">{{localize "DOCUMENT.FIELDS.type.label"}}</span><span class="suit">{{localize "CARD.FIELDS.suit.label"}}</span><span class="value">{{localize "CARD.FIELDS.value.label"}}</span>
+    {{#if isDeck}}<span class="drawn">{{localize "CARD.FIELDS.drawn.label"}}</span>{{/if}}
+    <span class="face-label">{{localize "CARD.FIELDS.face.label"}}</span>
+    {{#if isDeck}}<span class="advanced-interface-card-toolbar">
+      {{#if canManage}}<button type="button" data-action="controlCard" data-control="create" data-tooltip="CARDS.ACTIONS.Create" aria-label="{{localize 'CARDS.ACTIONS.Create'}}"><i class="fa-solid fa-plus"></i> {{localize "ADVANCED_INTERFACE.PlayingCards.Add"}}</button>{{/if}}
+    </span>{{/if}}
+  </div>
+  <ol class="cards scrollable" data-cards>
+    {{#each entries}}
+    <li data-card-id="{{card.id}}" data-card-name="{{card.name}}" class="advanced-interface-playing-card {{#if card.drawn}}drawn{{/if}}">
+      <span class="advanced-interface-card-image">
+        {{#if @root.isDeck}}<button type="button" class="advanced-interface-card-list-action icon fa-solid fa-eye" data-action="viewCard" data-tooltip="ADVANCED_INTERFACE.PlayingCards.View" aria-label="{{localize 'ADVANCED_INTERFACE.PlayingCards.View'}}"></button>{{/if}}
+        {{#if primaryRecall}}<button type="button" class="advanced-interface-card-gallery-action icon fa-solid fa-recycle" data-action="recallCard" data-tooltip="ADVANCED_INTERFACE.PlayingCards.Recall" aria-label="{{localize 'ADVANCED_INTERFACE.PlayingCards.Recall'}}"></button>
+        {{else}}{{#if canPlay}}<button type="button" class="advanced-interface-card-play-action icon fa-solid fa-circle-play" data-action="playCard" data-tooltip="CARD.Play" aria-label="{{localize 'CARD.Play'}}"></button>{{/if}}{{/if}}
+        <img class="face" src="{{card.img}}" alt="{{card.name}}" loading="lazy">
+      </span>
+      <span class="name">{{card.name}}</span><span class="type">{{type}}</span><span class="suit">{{suit}}</span><span class="value">{{value}}</span>
+      {{#if @root.isDeck}}<span class="drawn">{{#if primaryRecall}}<button type="button" class="icon fa-solid fa-recycle" data-action="recallCard" data-tooltip="ADVANCED_INTERFACE.PlayingCards.Recall" aria-label="{{localize 'ADVANCED_INTERFACE.PlayingCards.Recall'}}"></button>{{/if}}</span>{{/if}}
+      <span class="faces">
+        {{#if @root.canManage}}
+        <button type="button" class="ui-control icon fa-solid fa-caret-up" data-action="controlCard" data-control="nextFace" data-tooltip="CARDS.ACTIONS.NextFace" aria-label="{{localize 'CARDS.ACTIONS.NextFace'}}" {{disabled (not card.hasNextFace)}}></button>
+        <button type="button" class="ui-control icon fa-solid fa-caret-down" data-action="controlCard" data-control="prevFace" data-tooltip="CARDS.ACTIONS.PreviousFace" aria-label="{{localize 'CARDS.ACTIONS.PreviousFace'}}" {{disabled (not card.hasPreviousFace)}}></button>
+        {{/if}}
+      </span>
+      {{#if @root.isDeck}}<span class="controls">
+        {{#if @root.canManage}}
+        <button type="button" class="ui-control icon fa-solid fa-pen-to-square" data-action="controlCard" data-control="edit" data-tooltip="CARDS.ACTIONS.Edit" aria-label="{{localize 'CARDS.ACTIONS.Edit'}}"></button>
+        <button type="button" class="ui-control icon fa-solid fa-trash" data-action="controlCard" data-control="delete" data-tooltip="CARDS.ACTIONS.Delete" aria-label="{{localize 'CARDS.ACTIONS.Delete'}}"></button>
+        {{/if}}
+      </span>{{/if}}
+    </li>
+    {{else}}<li class="hint">{{localize "CARDS.NoCards"}}</li>{{/each}}
+  </ol>
+</section>

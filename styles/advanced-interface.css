@@ -1,3 +1,397 @@
+.advanced-interface-card-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-block: 4px;
+  flex: 0 0 auto;
+}
+
+.advanced-interface-card-toolbar > input {
+  min-width: 70px;
+  flex: 1;
+}
+
+.advanced-interface-stack-header {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.advanced-interface-stack-header img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  cursor: pointer;
+  border: 0;
+}
+
+.advanced-interface-stack-header input {
+  font-size: 18px;
+  height: 48px;
+  line-height: 48px;
+  min-width: 0;
+}
+
+.advanced-interface-card-faces .face-control {
+  flex: 0 0 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.advanced-interface-card-face legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 5px;
+}
+
+.advanced-interface-card-face legend input,
+.advanced-interface-card-face legend .face-control {
+  height: 24px;
+}
+
+.advanced-interface-card-face legend .face-control {
+  flex-basis: 24px;
+}
+
+.advanced-interface-stack-sheet .window-content {
+  min-height: 0;
+  gap: 8px;
+}
+
+.advanced-interface-stack-sheet .tab.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.advanced-interface-stack-sheet .advanced-interface-stack-cards.active {
+  flex: 1;
+  overflow: hidden;
+  max-height: 60vh;
+}
+
+.advanced-interface-stack-sheet ol[data-cards] {
+  flex: 1;
+  min-height: 200px;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.advanced-interface-stack-sheet .advanced-interface-card-columns,
+.advanced-interface-stack-sheet ol[data-cards] > li[data-card-id] {
+  display: grid;
+  grid-template-columns: 60px minmax(80px, 1fr) repeat(3, 60px) 60px;
+  gap: 0;
+  align-items: center;
+  min-width: 0;
+  padding: 4px 0;
+}
+
+.advanced-interface-stack-sheet.deck .advanced-interface-card-columns,
+.advanced-interface-stack-sheet.deck ol[data-cards] > li[data-card-id] {
+  grid-template-columns: 60px minmax(80px, 1fr) repeat(3, 60px) 60px 60px 60px;
+}
+
+.advanced-interface-card-columns {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  padding-right: var(--advanced-interface-card-scrollbar, 0px) !important;
+}
+
+.advanced-interface-card-columns > :not(.name),
+.advanced-interface-stack-sheet ol[data-cards] > li > :not(.name) {
+  text-align: center;
+}
+
+.advanced-interface-stack-sheet ol[data-cards] > li[data-card-id] {
+  height: auto;
+  min-height: 0;
+  margin: 0 0 4px;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.advanced-interface-stack-sheet ol[data-cards] > li[hidden] {
+  display: none;
+}
+
+.advanced-interface-card-image {
+  position: relative;
+  display: block;
+}
+
+.advanced-interface-card-image img.face {
+  display: block;
+  float: none;
+  width: 40px;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  border: 0;
+}
+
+.advanced-interface-card-image button {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0;
+  z-index: 1;
+  font-size: 30px;
+}
+
+.advanced-interface-card-image button:is(:hover, :focus-visible) {
+  opacity: 1;
+}
+
+.advanced-interface-card-image button:is(:hover, :focus-visible) ~ img {
+  opacity: 0.5;
+}
+
+.advanced-interface-stack-sheet.deck:not(.advanced-interface-card-gallery) .advanced-interface-card-play-action,
+.advanced-interface-stack-sheet:not(.advanced-interface-card-gallery) .advanced-interface-card-gallery-action {
+  display: none;
+}
+
+.advanced-interface-stack-sheet ol[data-cards] > li > .name {
+  min-width: 0;
+  font-weight: 400;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.advanced-interface-stack-sheet ol[data-cards] > li > :is(.faces, .controls) {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.advanced-interface-stack-sheet ol[data-cards] > li > .faces {
+  flex-direction: column;
+}
+
+.advanced-interface-stack-sheet ol[data-cards] button {
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  flex: 0 0 24px;
+  padding: 0;
+  margin: 0;
+}
+
+.advanced-interface-stack-sheet :is(.advanced-interface-card-columns, ol[data-cards]) button {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.advanced-interface-card-toolbar button {
+  width: auto;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.advanced-interface-stack-sheet .form-footer {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+.advanced-interface-card-sheet,
+.advanced-interface-card-scry,
+.advanced-interface-card-layout {
+  max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 16px);
+}
+
+.advanced-interface-stack-sheet.advanced-interface-card-gallery ol[data-cards] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 8px;
+  padding: 4px;
+}
+
+.advanced-interface-stack-sheet.advanced-interface-card-gallery ol[data-cards] > li[data-card-id] {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  position: relative;
+  height: auto;
+  min-height: 0;
+  flex: none;
+}
+
+.advanced-interface-stack-sheet.advanced-interface-card-gallery .advanced-interface-card-image img.face {
+  flex: none;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  object-fit: contain;
+  border: 0;
+}
+
+.advanced-interface-stack-sheet.advanced-interface-card-gallery ol[data-cards] > li > .name {
+  flex: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.advanced-interface-stack-sheet.advanced-interface-card-gallery ol[data-cards] > li > :is(.type, .suit, .value, .drawn, .faces, .controls),
+.advanced-interface-stack-sheet.advanced-interface-card-gallery .advanced-interface-card-list-action {
+  display: none;
+}
+
+.advanced-interface-card-gallery .advanced-interface-card-columns {
+  display: flex;
+  justify-content: space-between;
+}
+
+.advanced-interface-card-gallery .advanced-interface-card-columns > :not(.sort, .advanced-interface-card-toolbar) {
+  display: none;
+}
+
+.advanced-interface-card-gallery .advanced-interface-card-image button {
+  font-size: 46px;
+}
+
+.advanced-interface-card-layout .form-group > .form-fields {
+  min-width: 0;
+}
+
+@media (max-width: 620px) {
+  .advanced-interface-stack-sheet:not(.advanced-interface-card-gallery) ol[data-cards] > li[data-card-id],
+  .advanced-interface-stack-sheet:not(.advanced-interface-card-gallery) .advanced-interface-card-columns {
+    grid-template-columns: 60px minmax(65px, 1fr) 60px;
+  }
+  .advanced-interface-stack-sheet.deck:not(.advanced-interface-card-gallery) ol[data-cards] > li[data-card-id],
+  .advanced-interface-stack-sheet.deck:not(.advanced-interface-card-gallery) .advanced-interface-card-columns {
+    grid-template-columns: 60px minmax(65px, 1fr) 60px 60px 60px;
+  }
+  .advanced-interface-stack-sheet:not(.advanced-interface-card-gallery) ol[data-cards] > li > :is(.type, .suit, .value),
+  .advanced-interface-card-columns > :is(.type, .suit, .value) {
+    display: none;
+  }
+}
+
+.advanced-interface-card-hud {
+  position: fixed;
+  z-index: 50;
+  transform-origin: top left;
+}
+
+.advanced-interface-card-hud-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 32px);
+  grid-auto-rows: 32px;
+  gap: 4px;
+}
+
+.advanced-interface-card-hud input {
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 4px;
+  font-size: var(--font-size-16);
+  text-align: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: var(--advanced-interface-toolbar-color);
+  box-shadow: none;
+}
+
+.advanced-interface-card-hud button,
+.advanced-interface-card-hud button:is(:hover, :focus-visible, :active, [aria-pressed="true"]) {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 4px;
+  background: var(--advanced-interface-toolbar-color);
+  color: var(--color-text-primary);
+  box-shadow: none;
+  font-size: var(--font-size-16);
+}
+
+.advanced-interface-card-hud input:is(:hover, :focus) {
+  border-color: var(--advanced-interface-hover-color, #4f4fff);
+  outline: none;
+}
+
+.advanced-interface-player-hand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  min-width: 32px;
+}
+
+.advanced-interface-card-scry .window-content,
+.advanced-interface-card-scry .standard-form {
+  min-height: 0;
+}
+
+.advanced-interface-card-scry .standard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.advanced-interface-card-scry h3 {
+  font-size: 18px;
+  line-height: 1.3;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.advanced-interface-scry-list {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.advanced-interface-scry-list li {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 32px 32px 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.advanced-interface-scry-list img {
+  width: 72px;
+  height: 100px;
+  object-fit: contain;
+  border: 0;
+}
+
+.advanced-interface-scry-list li > span {
+  overflow-wrap: anywhere;
+}
+
+.advanced-interface-card-scry .form-footer {
+  flex-wrap: wrap;
+}
+
 /* Third-party popouts and embedded panel contents retain their own styles. */
 @scope (:root) to (.advanced-interface-native-panel.sidebar-popout, .advanced-interface-native-panel > :not(.window-header), .chat-message > .message-content > *) {
 /* Cascade: shared primitives, layout, component bases, then cross-component states and overlays.
@@ -274,18 +668,20 @@ body .advanced-interface-badged-button::before {
 #scene-controls .ui-control {
   --control-size: 32px;
   --control-bg-color: var(--advanced-interface-toolbar-color);
+  --control-border-color: transparent !important;
   width: 32px;
   height: 32px;
   --control-hover-bg-color: var(--control-bg-color) !important;
   --control-active-bg-color: var(--control-bg-color) !important;
-  --control-hover-border-color: var(--advanced-interface-hover-color) !important;
-  --control-active-border-color: var(--advanced-interface-selected-color) !important;
+  --control-hover-border-color: transparent !important;
+  --control-active-border-color: transparent !important;
   --control-hover-icon-color: var(--advanced-interface-hover-color) !important;
   --control-active-icon-color: var(--advanced-interface-selected-color) !important;
   --advanced-interface-button-icon-color: var(--advanced-interface-text-color);
   color: var(--advanced-interface-button-icon-color) !important;
   background: var(--control-bg-color) !important;
   border-color: var(--control-border-color) !important;
+  outline: none !important;
   box-shadow: none !important;
 }
 
@@ -642,12 +1038,57 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   height: auto;
 }
 
+/* Keep surface corners consistent, including sticky controls that override native styling. */
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot,
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right .ui-control,
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot .slot-icon,
+.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #hotbar-controls-right,
+.sidebar-tab:not(:where(.compendium-directory)).advanced-interface-matched-popout > .window-header,
+.advanced-interface-chat-style.directory .directory-header search,
+.advanced-interface-chat-style.placeables-sidebar search,
+.advanced-interface-chat-style .combat-tracker-header > .encounters,
+.advanced-interface-chat-style .combat-tracker-header > .encounter-controls,
+.advanced-interface-chat-style .combat-controls,
+.advanced-interface-chat-style .directory-footer > button,
+.advanced-interface-chat-style .directory-item.entry,
+.advanced-interface-chat-style .combatant,
+.advanced-interface-chat-style .placeable-entry,
+.advanced-interface-chat-style.playlists-sidebar .global-control,
+.advanced-interface-chat-style.settings-sidebar > section,
+.advanced-interface-chat-style.settings-sidebar > .window-content > section,
+.advanced-interface-scene-levels > ul > li,
+.advanced-interface-scene-levels .advanced-interface-scene-level,
+.advanced-interface-chat-style .directory-item.folder > .folder-header,
+.advanced-interface-chat-style.settings-sidebar .advanced-interface-settings-toolbar,
+.advanced-interface-chat-style.placeables-sidebar .placeable-group[data-author-id] > .group-header,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist.directory-item.document,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .playlist > .playlist-header,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.playlists-sidebar .sound,
+.chat-sidebar .chat-form > #chat-controls,
+#chat-controls > .split-button > .ui-control,
+.advanced-interface-time-controls,
+.advanced-interface-calendar,
+.advanced-interface-utility-content #players .advanced-interface-player-heading,
+.advanced-interface-utility-content #players #performance-stats,
+:is(.advanced-interface-utility-content #players, .advanced-interface-player-window) .player,
+.advanced-interface-player-window,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls > button.ui-control.plain,
+:is(#sidebar.advanced-interface, .sidebar-tab:not(.compendium-directory).sidebar-popout) #chat-message::after,
+.advanced-interface-chat-style .combat-tracker-header > :is(.encounters, .encounter-controls),
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .group-header.advanced-interface-placeable-bar,
+:is(#sidebar *, .sidebar-popout).advanced-interface-chat-style.placeables-sidebar .placeable-group[data-author-id] > .group-header.advanced-interface-placeable-bar,
+.advanced-interface-navigation-heading,
+.advanced-interface-actor-navigation-heading,
+.advanced-interface-chat-style:is(.actors-sidebar, .items-sidebar) .advanced-interface-actor-navigation-entry,
+.advanced-interface-panel-scroll .advanced-interface-panel-control {
+  border-radius: 6px !important;
+}
+
 .sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot {
   width: 100%;
   min-width: 0;
   height: auto;
   aspect-ratio: 1;
-  border-radius: 6px;
   border: 1px solid transparent;
 }
 
@@ -656,7 +1097,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   --advanced-interface-button-icon-color: var(--control-icon-color);
   background: var(--advanced-interface-hotbar-control-background, var(--control-bg-color)) !important;
   border: 1px solid transparent;
-  border-radius: 6px;
   color: var(--advanced-interface-button-icon-color) !important;
   box-shadow: none;
   outline: none;
@@ -677,10 +1117,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   background: var(--advanced-interface-hotbar-control-background, var(--control-active-bg-color)) !important;
 }
 
-.sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot .slot-icon {
-  border-radius: 6px;
-}
-
 .sidebar-tab:not(:where(.compendium-directory)) #hotbar.advanced-interface-hotbar #action-bar .slot .key {
   background: transparent;
   color: var(--key-text-color) !important;
@@ -699,7 +1135,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   align-items: center;
   gap: 8px;
   background: var(--advanced-interface-toolbar-background);
-  border-radius: 6px;
   padding: 0;
   margin-bottom: 4px;
 }
@@ -841,7 +1276,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   padding: 0;
   gap: 0;
   border: none;
-  border-radius: 6px;
   background: var(--advanced-interface-tab-color, var(--advanced-interface-toolbar-color));
   color: var(--color-text-primary);
   box-shadow: none;
@@ -962,7 +1396,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   height: 32px;
   min-height: 32px;
   max-height: 32px;
-  border-radius: 6px;
   padding: 0;
   gap: 8px;
   align-items: center;
@@ -1116,7 +1549,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
 .advanced-interface-chat-style.settings-sidebar > .window-content > section {
   background: var(--advanced-interface-card-background);
   border: 1px solid var(--advanced-interface-card-border);
-  border-radius: 6px;
   padding: 8px;
   margin-block: 0;
   color: var(--color-text-primary);
@@ -1379,7 +1811,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
 
 .advanced-interface-scene-levels > ul > li {
   background: var(--advanced-interface-card-background);
-  border-radius: 6px;
   overflow: hidden;
   border: none;
   box-shadow: inset 0 0 0 1px var(--advanced-interface-card-border);
@@ -1394,7 +1825,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   gap: 8px;
   padding: 0;
   border: none;
-  border-radius: 6px;
   font-family: var(--font-body);
   font-size: var(--font-size-16);
   font-weight: normal;
@@ -1588,7 +2018,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   gap: 0;
   height: 32px;
   flex: none;
-  border-radius: 6px;
 }
 
 .advanced-interface-chat-style .folder-header > i,
@@ -1865,7 +2294,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   gap: 0;
   height: 32px;
   padding: 0;
-  border-radius: 6px;
   background: var(--advanced-interface-toolbar-background);
   color: var(--advanced-interface-text-color);
 }
@@ -1905,7 +2333,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
 .advanced-interface-chat-style.placeables-sidebar .placeable-group[data-author-id] > .group-header {
   height: 32px;
   padding: 0;
-  border-radius: 6px;
   background: var(--sidebar-folder-color, var(--color-dark-1));
   text-shadow: none;
 }
@@ -2170,7 +2597,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   overflow: hidden;
   padding: 0;
   border-top: none;
-  border-radius: 6px;
   box-shadow: none;
 }
 
@@ -2178,7 +2604,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   height: 32px;
   gap: 0;
   padding: 0;
-  border-radius: 6px;
   background: var(--advanced-interface-toolbar-background);
   color: var(--advanced-interface-text-color);
   line-height: 32px;
@@ -2223,7 +2648,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   overflow: hidden;
   padding: 0;
   border: 1px solid var(--advanced-interface-card-border);
-  border-radius: 6px;
   background: var(--advanced-interface-card-background);
 }
 
@@ -2407,7 +2831,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   order: -1;
   flex: 0 0 32px;
   height: 32px;
-  border-radius: 6px;
   padding: 0;
 }
 
@@ -2429,7 +2852,6 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
 }
 
 #chat-controls > .split-button > .ui-control {
-  border-radius: 6px;
   border-inline-end-width: 1px;
   border-inline-start-color: var(--control-border-color);
 }
@@ -2645,7 +3067,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   height: 32px;
   min-height: 32px;
   background: var(--advanced-interface-toolbar-background);
-  border-radius: 6px;
 }
 
 .advanced-interface-time-controls button,
@@ -2711,6 +3132,14 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   left: 0;
 }
 
+.advanced-interface-sundial #calendar-hud .calendar-widget,
+.advanced-interface-time-controls select,
+#chat-message .advanced-interface-format-select,
+:is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) :is(ul, li),
+:is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud :is(.palette, .palette-list-entry) {
+  border-radius: 3px;
+}
+
 :is(.advanced-interface-dropdown, #prosemirror-dropdown.advanced-interface-format-dropdown) ul,
 :is(#token-hud, #tile-hud, #drawing-hud).advanced-interface-placeable-hud .palette {
   box-sizing: border-box;
@@ -2719,7 +3148,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   list-style: none;
   background: var(--dropdown-background);
   border: 1px solid var(--dropdown-border);
-  border-radius: 3px;
   color: var(--advanced-interface-text-color);
   font-size: var(--font-size-16);
   font-weight: 400;
@@ -2747,7 +3175,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   box-sizing: border-box;
   min-height: 32px;
   padding: 0 6px;
-  border-radius: 3px;
   white-space: nowrap;
   cursor: var(--cursor-pointer);
   outline: none;
@@ -2811,7 +3238,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   align-self: flex-start;
   gap: 8px;
   background: var(--advanced-interface-card-background, var(--advanced-interface-card-color));
-  border-radius: 6px;
   min-width: 0;
   overflow-x: clip;
   font-family: var(--font-body);
@@ -2920,7 +3346,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   width: 100%;
   height: 100%;
   border: none;
-  border-radius: 6px;
   margin: 0;
 }
 
@@ -3004,7 +3429,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   height: 32px;
   gap: 0;
   padding: 0;
-  border-radius: 6px;
   background: var(--advanced-interface-toolbar-background);
   font-size: var(--font-size-16);
 }
@@ -3048,7 +3472,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   min-height: 32px;
   align-items: center;
   background: var(--advanced-interface-toolbar-background);
-  border-radius: 6px;
   font-family: var(--font-body);
   font-size: var(--font-size-16);
   flex-wrap: nowrap;
@@ -3153,7 +3576,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   padding: 0;
   margin-block: 0;
   overflow: clip;
-  border-radius: 6px;
   background: var(--advanced-interface-card-background);
   font-size: var(--font-size-16);
   line-height: 32px;
@@ -3328,7 +3750,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   margin: 0;
   padding: 0;
   list-style: none;
-  border-radius: 6px;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
   color: var(--color-text-primary);
   pointer-events: all;
@@ -3430,7 +3851,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
 
 :is(#sidebar.advanced-interface, .sidebar-tab:not(:where(.compendium-directory)).sidebar-popout) .advanced-interface-time-controls > button.ui-control.plain {
   padding: 0;
-  border-radius: 6px;
   background: transparent !important;
 }
 
@@ -3546,7 +3966,6 @@ body:has(#prosemirror-dropdown) #chat-message .editor-menu button.format:focus:n
   position: absolute;
   inset: 0;
   z-index: 3;
-  border-radius: 6px;
   box-shadow: inset 0 0 0 1px transparent;
   pointer-events: none;
 }
@@ -4292,7 +4711,6 @@ body #context-menu.advanced-interface-card-actions .context-item > i {
   align-items: center;
   height: 32px;
   gap: 0;
-  border-radius: 6px;
   overflow: hidden;
   background: var(--advanced-interface-toolbar-background);
   color: var(--advanced-interface-text-color);
@@ -4659,7 +5077,6 @@ body #context-menu.advanced-interface-card-actions .context-item > i {
   height: 32px;
   gap: 0;
   padding: 0;
-  border-radius: 6px;
   background: var(--advanced-interface-toolbar-background);
   color: var(--advanced-interface-text-color);
   text-shadow: none;
@@ -4715,7 +5132,6 @@ body #context-menu.advanced-interface-card-actions .context-item > i {
   height: 32px;
   padding-left: 8px;
   margin: 0;
-  border-radius: 6px;
   background: var(--advanced-interface-toolbar-background);
   color: var(--advanced-interface-bar-color);
   font-size: var(--font-size-16);
@@ -5294,7 +5710,6 @@ body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .comba
   align-items: center;
   min-height: 32px;
   padding-inline-start: 8px;
-  border-radius: 6px;
   background: var(--advanced-interface-toolbar-background, color-mix(in srgb, var(--color-text-primary) 12%, transparent));
   color: var(--advanced-interface-bar-color, var(--color-text-primary));
   font-size: var(--font-size-16);
@@ -5368,7 +5783,6 @@ body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .comba
 .advanced-interface-chat-style:is(.actors-sidebar, .items-sidebar) .advanced-interface-actor-navigation-entry {
   background: var(--advanced-interface-card-background);
   border: 1px solid var(--advanced-interface-card-border);
-  border-radius: 6px;
   color: var(--color-text-primary);
   cursor: pointer;
 }
@@ -5431,7 +5845,6 @@ body :is(#sidebar.advanced-interface, .advanced-interface-matched-popout) .comba
   top: var(--advanced-interface-sticky-offset, 0px);
   z-index: 10;
   margin-block: 0;
-  border-radius: 6px !important;
   /* Reuse the panel toolbar fill; clipping in sidebar-scrolling.mjs keeps sticky gaps transparent. */
   background-color: var(--advanced-interface-toolbar-background, transparent);
 }

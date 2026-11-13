@@ -1,0 +1,21 @@
+<section class="standard-form">
+  <h3>{{name}}</h3>
+  <ol class="advanced-interface-scry-list scrollable">
+    {{#each cards}}
+    <li>
+      <img src="{{img}}" alt="{{name}}">
+      <span>{{name}}</span>
+      <span class="advanced-interface-scry-position">{{position}}</span>
+      <button type="button" class="ui-control icon fa-solid fa-arrow-up" data-action="top" data-card-id="{{id}}"
+        data-tooltip="ADVANCED_INTERFACE.PlayingCards.Top" aria-label="{{localize 'ADVANCED_INTERFACE.PlayingCards.Top'}}"></button>
+      <button type="button" class="ui-control icon fa-solid fa-arrow-down" data-action="bottom" data-card-id="{{id}}"
+        data-tooltip="ADVANCED_INTERFACE.PlayingCards.Bottom" aria-label="{{localize 'ADVANCED_INTERFACE.PlayingCards.Bottom'}}"></button>
+    </li>
+    {{/each}}
+  </ol>
+  <footer class="form-footer">
+    <button type="button" data-action="shuffle"><i class="fa-solid fa-shuffle"></i>{{localize "ADVANCED_INTERFACE.PlayingCards.ShuffleReplace"}}</button>
+    <button type="button" data-action="save"><i class="fa-solid fa-check"></i>{{localize "ADVANCED_INTERFACE.PlayingCards.SaveOrder"}}</button>
+    <button type="button" data-action="cancel"><i class="fa-solid fa-xmark"></i>{{localize "ADVANCED_INTERFACE.PlayingCards.Cancel"}}</button>
+  </footer>
+</section>

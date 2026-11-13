@@ -15,7 +15,7 @@ const sceneListeners = new WeakSet();
 const sceneObservers = new WeakMap();
 
 // Layers whose objects can stay displayed while inactive (right-click the layer tab). Notes use core's display setting.
-const DISPLAY_LAYERS = {drawings: "DrawingsLayer", walls: "WallsLayer", lighting: "LightingLayer", sounds: "SoundsLayer", regions: "RegionLayer", notes: "NotesLayer"};
+const DISPLAY_LAYERS = {drawings: "DrawingsLayer", walls: "WallsLayer", lighting: "LightingLayer", sounds: "SoundsLayer", regions: "RegionLayer", notes: "NotesLayer", advancedCards: "AdvancedCardLayer"};
 const NOTES_SETTING = ["core", "notesDisplayToggle"];
 
 function isLayerDisplayed(name) {
@@ -25,7 +25,7 @@ function isLayerDisplayed(name) {
 
 function applyLayerDisplay() {
   if (!canvas.ready) return;
-  for (const name of ["walls", "lighting", "sounds"]) {
+  for (const name of ["walls", "lighting", "sounds", "advancedCards"]) {
     const layer = canvas[name];
     if (layer?.objects) layer.objects.visible = layer.active || isLayerDisplayed(name);
   }
@@ -197,7 +197,6 @@ export function registerSceneControlTools() {
     delete controls.notes.tools.toggle;
     for (const control of Object.values(controls)) {
       control.tools[IDLE_CONTROL] = idle({interaction: false, control: false, creation: false});
-      if (control.tools.snap) control.tools.snap.icon = "fa-solid fa-border-inner";
       if (control.tools.ellipse) control.tools.ellipse.icon = "fa-regular fa-circle";
     }
     controls.walls.tools.solid.icon = controls.walls.icon;

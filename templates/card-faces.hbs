@@ -1,0 +1,19 @@
+<section class="tab standard-form advanced-interface-card-faces {{#if tab.active}}active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  <div class="form-group">
+    <label>{{localize "CARD.FIELDS.face.label"}}</label>
+    <div class="form-fields">
+      {{formInput fields.face value=source.face choices=faceChoices blank=backLabel rootId=rootId}}
+    </div>
+    <button type="button" class="face-control" data-action="addFace" data-tooltip="CARD.ACTIONS.AddFace" aria-label="{{localize 'CARD.ACTIONS.AddFace'}}"><i class="fa-solid fa-plus"></i></button>
+  </div>
+  {{#each faceEntries as |face|}}
+  <fieldset class="advanced-interface-card-face" data-face data-index="{{face.index}}">
+    <legend>
+      {{formInput ../faceFields.name name=(concat "faces." face.index ".name") value=face.name placeholder=(localize "DOCUMENT.FIELDS.name.label")}}
+      <button type="button" class="face-control" data-action="deleteFace" data-tooltip="CARD.ACTIONS.DeleteFace.Title" aria-label="{{localize 'CARD.ACTIONS.DeleteFace.Title'}}"><i class="fa-solid fa-trash"></i></button>
+    </legend>
+    {{formGroup ../faceFields.img name=(concat "faces." face.index ".img") value=face.img placeholder="icons/svg/card-joker.svg"}}
+    {{formGroup ../faceFields.text name=(concat "faces." face.index ".text") value=face.text enriched=face.enriched button=true toggled=false}}
+  </fieldset>
+  {{/each}}
+</section>

@@ -1,5 +1,23 @@
 export const MODULE_ID = "advanced-interface";
 
+let panelSettingsQueue = Promise.resolve();
+
+export function getPanelSetting(key, fallback) {
+  const settings = game.settings.get(MODULE_ID, "worldPanelSettings");
+  return foundry.utils.deepClone(settings?.[game.world.id]?.[key] ?? fallback);
+}
+
+export function setPanelSettings(updates) {
+  const save = async () => {
+    const settings = foundry.utils.deepClone(game.settings.get(MODULE_ID, "worldPanelSettings") ?? {});
+    const world = settings[game.world.id] ??= {};
+    for (const [key, value] of Object.entries(updates)) world[key] = foundry.utils.deepClone(value);
+    await game.settings.set(MODULE_ID, "worldPanelSettings", settings);
+  };
+  panelSettingsQueue = panelSettingsQueue.then(save, save);
+  return panelSettingsQueue;
+}
+
 const MANAGED_SIDEBAR_TABS = new Set([
   "chat", "combat", "scenes", "actors", "items", "journal", "tables", "cards",
   "macros", "playlists", "compendium", "settings", "placeables",
@@ -80,7 +98,7 @@ export function createDirectoryToggle(doc, tab, className) {
       if (button.disabled) return;
       button.disabled = true;
       try {
-        await game.settings.set(MODULE_ID, setting, !game.settings.get(MODULE_ID, setting));
+        await setPanelSettings({[setting]: !getPanelSetting(setting, false)});
       } finally {
         button.disabled = false;
       }
@@ -91,7 +109,7 @@ export function createDirectoryToggle(doc, tab, className) {
 
 export function syncDirectoryVisibility(tab) {
   const {setting, name} = DIRECTORY_VISIBILITY[tab];
-  const hidden = game.settings.get(MODULE_ID, setting);
+  const hidden = getPanelSetting(setting, false);
   for (const app of [ui[tab], ui[tab]?.popout]) {
     app?.element?.classList.toggle(`advanced-interface-${name}-directory-hidden`, hidden);
   }

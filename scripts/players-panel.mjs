@@ -1,6 +1,6 @@
 import {decorateIconButtons} from "./interface-components.mjs";
 import {panelWidth} from "./sidebar.mjs";
-import {MODULE_ID, createButton, localize, reportError, setButtonLabel, targetApp} from "./helper.mjs";
+import {MODULE_ID, createButton, getPanelSetting, localize, reportError, setButtonLabel, setPanelSettings, targetApp} from "./helper.mjs";
 
 const report = reportError("Players panel");
 
@@ -130,14 +130,14 @@ const DRAG_THRESHOLD = 5;
 const floatingCards = new Map();
 
 function floatingState() {
-  return foundry.utils.deepClone(game.settings.get(MODULE_ID, FLOATING_SETTING) ?? {});
+  return getPanelSetting(FLOATING_SETTING, {});
 }
 
 function saveFloating(userId, position) {
   const state = floatingState();
   if (position) state[userId] = {left: Math.round(position.left), top: Math.round(position.top)};
   else delete state[userId];
-  return game.settings.set(MODULE_ID, FLOATING_SETTING, state).catch(report);
+  return setPanelSettings({[FLOATING_SETTING]: state}).catch(report);
 }
 
 function markFloatingRows(players = ui.players?.element) {

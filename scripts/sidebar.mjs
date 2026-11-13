@@ -1,7 +1,7 @@
 import {createPartySheetButton, decorateIconButtons} from "./interface-components.mjs";
 import {toggleAllVolumes} from "./playlists.mjs";
 import {detachedSettingsMenu} from "./settings-panel.mjs";
-import {DIRECTORY_VISIBILITY, MODULE_ID, createButton, createDirectoryToggle, isManagedSidebarTab, localize, reportError, setButtonLabel, syncDirectoryVisibility} from "./helper.mjs";
+import {DIRECTORY_VISIBILITY, MODULE_ID, createButton, createDirectoryToggle, getPanelSetting, isManagedSidebarTab, localize, reportError, setButtonLabel, setPanelSettings, syncDirectoryVisibility} from "./helper.mjs";
 
 const PANEL_WIDTHS = {
   advancedControls: 104,
@@ -83,10 +83,8 @@ export class AdvancedSidebar extends CONFIG.ui.sidebar {
 
   async resetTabLocations() {
     await Promise.all([
-      game.settings.set(MODULE_ID, "tabOrder", []),
-      game.settings.set(MODULE_ID, "tabSides", {}),
-      game.settings.set(MODULE_ID, "tabRows", {}),
-      ...Object.values(DIRECTORY_VISIBILITY).map(({setting}) => game.settings.set(MODULE_ID, setting, false)),
+      setPanelSettings({tabOrder: [], tabSides: {}, tabRows: {},
+        ...Object.fromEntries(Object.values(DIRECTORY_VISIBILITY).map(({setting}) => [setting, false]))}),
       ...["fixedHUDSize", "fixedDoorSize"].map(key => game.settings.set(MODULE_ID, key, false)),
       game.settings.set(MODULE_ID, "layerDisplay", {}),
       game.settings.set("core", "notesDisplayToggle", false)
@@ -105,13 +103,13 @@ export class AdvancedSidebar extends CONFIG.ui.sidebar {
 
   #savePanelStates() {
     const value = {pinned: [...this.#pinned], shown: [...this.#shown]};
-    const saved = game.settings.get(MODULE_ID, "panelStates");
+    const saved = getPanelSetting("panelStates", {});
     if (JSON.stringify(saved) === JSON.stringify(value)) return;
-    game.settings.set(MODULE_ID, "panelStates", value).catch(reportError("Saving panel states"));
+    setPanelSettings({panelStates: value}).catch(reportError("Saving panel states"));
   }
 
   #restorePanelStates() {
-    const {pinned = [], shown = []} = game.settings.get(MODULE_ID, "panelStates");
+    const {pinned = [], shown = []} = getPanelSetting("panelStates", {});
     for (const tab of pinned) {
       const entry = this.element.querySelector(`#sidebar-tabs [data-tab="${tab}"]`)?.closest("li");
       if (!entry || entry.hidden || !ui[tab]) continue;
@@ -352,9 +350,9 @@ export class AdvancedSidebar extends CONFIG.ui.sidebar {
       button.removeAttribute("title");
       button.dataset.tooltipDirection = "DOWN";
     }
-    this.#tabOrder ??= game.settings.get(MODULE_ID, "tabOrder");
-    this.#tabSides ??= game.settings.get(MODULE_ID, "tabSides");
-    this.#tabRows ??= game.settings.get(MODULE_ID, "tabRows");
+    this.#tabOrder ??= getPanelSetting("tabOrder", []);
+    this.#tabSides ??= getPanelSetting("tabSides", {});
+    this.#tabRows ??= getPanelSetting("tabRows", {});
     const tabOrder = this.#tabOrder.length ? this.#tabOrder : DEFAULT_TAB_ORDER;
     const entryKey = entry => entry.querySelector("[data-tab]")?.dataset.tab || entry.id;
     const entrySide = entry => this.#tabSides[entryKey(entry)]
@@ -530,11 +528,8 @@ export class AdvancedSidebar extends CONFIG.ui.sidebar {
         this.#tabOrder = Array.from(menu.children).map(entryKey).filter(Boolean);
         this.#syncPanels();
         if (tab) this.#raisePanel(tab);
-        Promise.all([
-          game.settings.set(MODULE_ID, "tabOrder", this.#tabOrder),
-          game.settings.set(MODULE_ID, "tabSides", this.#tabSides),
-          game.settings.set(MODULE_ID, "tabRows", this.#tabRows)
-        ]).catch(reportError("Saving tab layout"));
+        setPanelSettings({tabOrder: this.#tabOrder, tabSides: this.#tabSides, tabRows: this.#tabRows})
+          .catch(reportError("Saving tab layout"));
         this.#draggedEntry = undefined;
         this.#dragAnchor = undefined;
         this.#ignoreClickUntil = Date.now() + 250;
@@ -670,7 +665,8 @@ export class AdvancedSidebar extends CONFIG.ui.sidebar {
         // Managed panels cycle Pin and Show; third-party panels retain their context menus.
         panel.addEventListener("contextmenu", event => {
           if (!isManagedSidebarTab({tabName: panel.dataset.tab})) return;
-          if (event.target.closest("#scene-controls-layers button[data-control]:is([data-control=drawings], [data-control=walls], [data-control=lighting], [data-control=sounds], [data-control=regions], [data-control=notes])")) return;
+          if (event.target.closest("#scene-controls [data-grid-snap]")) return;
+          if (event.target.closest("#scene-controls-layers button[data-control]:is([data-control=drawings], [data-control=walls], [data-control=lighting], [data-control=sounds], [data-control=regions], [data-control=notes], [data-control=advancedCards])")) return;
           if (!this.#openTabs.has(panel.dataset.tab)) return;
           if (!event.target.closest("input, textarea, select, [contenteditable]")) event.preventDefault();
           this.#cyclePanelVisibility(panel.dataset.tab);
