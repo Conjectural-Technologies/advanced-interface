@@ -662,11 +662,9 @@ export class AdvancedSidebar extends CONFIG.ui.sidebar {
         for (const eventName of ["pointerenter", "pointerleave", "focusin", "focusout"]) {
           panel.addEventListener(eventName, () => queueMicrotask(syncFade));
         }
-        // Managed panels cycle Pin and Show; third-party panels retain their context menus.
+        // Controls use only the tab shortcut; third-party panels retain their context menus.
         panel.addEventListener("contextmenu", event => {
-          if (!isManagedSidebarTab({tabName: panel.dataset.tab})) return;
-          if (event.target.closest("#scene-controls [data-grid-snap]")) return;
-          if (event.target.closest("#scene-controls-layers button[data-control]:is([data-control=drawings], [data-control=walls], [data-control=lighting], [data-control=sounds], [data-control=regions], [data-control=notes], [data-control=advancedCards])")) return;
+          if (panel.dataset.tab === "advancedControls" || !isManagedSidebarTab({tabName: panel.dataset.tab})) return;
           if (!this.#openTabs.has(panel.dataset.tab)) return;
           if (!event.target.closest("input, textarea, select, [contenteditable]")) event.preventDefault();
           this.#cyclePanelVisibility(panel.dataset.tab);

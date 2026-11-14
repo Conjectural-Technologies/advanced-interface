@@ -1536,6 +1536,10 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   padding: 0 var(--advanced-interface-scroll-gap, 0px) 4px 0;
 }
 
+#sidebar.advanced-interface #sidebar-content > .sidebar-tab.advanced-interface-bottom-row.advanced-interface-chat-style.directory > .directory-list {
+  padding-block-end: 0;
+}
+
 .advanced-interface-chat-style .combat-tracker {
   padding: 0 var(--advanced-interface-scroll-gap, 0px) 0 0;
 }
@@ -1567,7 +1571,7 @@ body.detached .sidebar-tab:not(:where(.compendium-directory)).advanced-interface
   margin-block: 0;
 }
 
-.advanced-interface-chat-style :is(.directory-list, .subdirectory) > .directory-item:not(:last-child),
+.advanced-interface-chat-style :is(.directory-list, .subdirectory, .advanced-interface-navigation-scenes) > .directory-item:not(:last-child),
 .advanced-interface-chat-style .combat-tracker > .combatant:not(:last-child) {
   margin-block-end: 4px;
 }

@@ -1,6 +1,6 @@
 # Advanced Interface
 
-**Release:** 2.0.3.
+**Release:** 2.0.4.
 
 A complete interface overhaul for Foundry VTT v14 and the D&D 5e system. It replaces the stock sidebar, scene controls, chat, combat tracker, players list, token HUD and settings screens with a cohesive card-based layout, and adds several quality-of-life tools for GMs and players.
 
@@ -19,6 +19,7 @@ https://github.com/Conjectural-Technologies/advanced-interface/releases/latest/d
 ### Sidebar, tabs and popouts
 - Tabs can be reordered and placed on different sides and rows by dragging.
 - Tabs can be pinned, shown or hidden. **Reset Tabs** in the settings panel restores the default arrangement.
+- Right-click an open tab or its panel to cycle pinning and visibility. For Controls, right-click the tab only.
 - Layout and panel states are remembered per client and world.
 - Tabs open as managed popouts that keep the module's styling.
 - Cards, headers, icon buttons, tooltips and scrollbars are consistent across every panel.
