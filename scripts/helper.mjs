@@ -90,6 +90,8 @@ export const DIRECTORY_VISIBILITY = {
   macros: {setting: "hideMacroDirectory", name: "macro"}
 };
 
+const pendingDirectoryVisibility = new Map();
+
 export function createDirectoryToggle(doc, tab, className) {
   const {setting, name} = DIRECTORY_VISIBILITY[tab];
   const button = createButton(doc, `${className} fa-solid fa-list advanced-interface-toggle-${name}-directory`, {
@@ -98,9 +100,14 @@ export function createDirectoryToggle(doc, tab, className) {
       if (button.disabled) return;
       button.disabled = true;
       try {
-        await setPanelSettings({[setting]: !getPanelSetting(setting, false)});
+        const hidden = !getPanelSetting(setting, false);
+        pendingDirectoryVisibility.set(tab, hidden);
+        syncDirectoryVisibility(tab);
+        await setPanelSettings({[setting]: hidden});
       } finally {
+        pendingDirectoryVisibility.delete(tab);
         button.disabled = false;
+        syncDirectoryVisibility(tab);
       }
     }
   });
@@ -109,7 +116,7 @@ export function createDirectoryToggle(doc, tab, className) {
 
 export function syncDirectoryVisibility(tab) {
   const {setting, name} = DIRECTORY_VISIBILITY[tab];
-  const hidden = getPanelSetting(setting, false);
+  const hidden = pendingDirectoryVisibility.get(tab) ?? getPanelSetting(setting, false);
   for (const app of [ui[tab], ui[tab]?.popout]) {
     app?.element?.classList.toggle(`advanced-interface-${name}-directory-hidden`, hidden);
   }

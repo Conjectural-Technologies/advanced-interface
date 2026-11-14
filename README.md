@@ -1,6 +1,6 @@
 # Advanced Interface
 
-**Release:** 2.0.0.
+**Release:** 2.0.3.
 
 A complete interface overhaul for Foundry VTT v14 and the D&D 5e system. It replaces the stock sidebar, scene controls, chat, combat tracker, players list, token HUD and settings screens with a cohesive card-based layout, and adds several quality-of-life tools for GMs and players.
 
